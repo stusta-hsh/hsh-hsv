@@ -26,8 +26,8 @@ function login() {
 		session_start();
 
 		$_SESSION['id'] = $user;
-		$_SESSION['user'] = q_assocFirstRow("SELECT name, first_name, last_name, email FROM users WHERE id = $user");
-		$_SESSION['room'] = q_assocFirstRow("SELECT house, floor, room, date, end FROM rooms r WHERE r.user = $user AND '$date' BETWEEN r.date AND (CASE WHEN r.end IS NULL THEN '$date' ELSE r.end END)");
+		$_SESSION['user'] = q_firstRow("SELECT name, first_name, last_name, email FROM users WHERE id = $user");
+		$_SESSION['room'] = q_firstRow("SELECT house, floor, room, date, end FROM rooms r WHERE r.user = $user AND '$date' BETWEEN r.date AND (CASE WHEN r.end IS NULL THEN '$date' ELSE r.end END)");
 		
 		return true;
 	}
