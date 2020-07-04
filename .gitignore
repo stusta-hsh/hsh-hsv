@@ -1,2 +1,2 @@
-api/sql_config.php
+api/db_config.php
 #contains database credentials

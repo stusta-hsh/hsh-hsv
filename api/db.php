@@ -15,4 +15,12 @@ function q_assocFirstRow($sql) { return mysqli_fetch_array(query($sql), MYSQLI_A
 function q_assocArray($sql) { return mysqli_fetch_all(query($sql), MYSQLI_ASSOC); }
 function q_firstColumn($sql) { return array_map(function ($a) { return $a[0]; }, mysqli_fetch_all(query($sql))); }
 
+function query_prepared($sql, ...$params) { 
+    global $db;
+    $stmt = mysqli_prepare($db, $sql);
+    mysqli_bind_param($stmt, $params);
+    mysqli_execute($stmt);
+    return $stmt;
+}
+function qp_firstField($sql, ...$params) { return mysqli_fetch_row(query_prepared($sql, $params))[0]; }
 ?>
