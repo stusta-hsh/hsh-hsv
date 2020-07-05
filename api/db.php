@@ -23,4 +23,6 @@ function query_prepared($sql, ...$params) {
     return $stmt;
 }
 function qp_firstField($sql, ...$params) { return mysqli_fetch_row(query_prepared($sql, $params))[0]; }
+function qp_firstRow($sql, ...$params) { return mysqli_fetch_array(query_prepaded($sql, $params), MYSQLI_ASSOC); }
+function qp_firstColumn($sql, ...$params) { return array_map(function ($a) { return $a[0]; }, mysqli_fetch_all(query_prepared($sql, $params))); }
 ?>

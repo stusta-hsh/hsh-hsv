@@ -1,7 +1,10 @@
 <?php
 
 require('db.php');
-$roletree = json_decode(file_get_contents('roles.json'));
+
+// ------------
+// IO-Functions
+// ------------
 
 function output($obj) {
 	header('Content-Type: application/json');
@@ -16,6 +19,11 @@ function require_param($param) {
 	}
 }
 
+// -----------------------
+// Authorisation functions
+// -----------------------
+
+$roletree = json_decode(file_get_contents('roles.json'));
 
 function authenticate() {
 	session_name('hshsession');
