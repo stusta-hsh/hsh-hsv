@@ -61,7 +61,7 @@ This functions simplify the handling of messages between the client and the serv
 *	`require_param`: Simplifies the handling of wrong requests.
 
 	The function checks whether the	given variable exists. If it does, the variable is returned,
-	if not, the request is rejected	with the HTTP stats code 401 (Bad request) and the script is aborted.
+	if not, the request is rejected	with the HTTP status code 401 (Bad request) and the script is aborted.
 
 	It is intended to be used like this:
 	```
@@ -75,7 +75,7 @@ This functions provide access control features for the API endpoints.
 *	`authenticate`: Before a user becomes authorized to do something, it needs to be verified,
 	that the user is who he claims to be.
 
-	Authentication is achieved here through PHP sessions. After a user [logs in](/user.md), a
+	Authentication is achieved here through PHP sessions. After a user [logs in](./user.md), a
 	cookie with an cryptic session ID is stored on the client. Information about this session,
 	like the users ID, is saved on the server, invisible for the user.
 
