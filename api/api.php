@@ -20,7 +20,7 @@ function require_param($param) {
 }
 
 // -----------------------
-// Authorisation functions
+// Authorization functions
 // -----------------------
 
 $roletree = json_decode(file_get_contents('roles.json'));
@@ -38,13 +38,13 @@ function authenticate() {
 }
 
 function authorize($scope) {
-	$user = authenticate();												// Ermittle Benutzer
+	$user = authenticate();												// identify the user
 	$date = date('Y-m-d');
-	$roles = roles(q_firstColumn(										// Ermittle alle Rollen des Benutzers
+	$roles = roles(q_firstColumn(										// identify all roles of the user
 		"SELECT u.role FROM user_roles u WHERE user = $user AND '$date' BETWEEN u.start AND u.end"));
 
-	foreach ($roles as $role) { if ($role == $scope) { return true; } }	// Trifft eine dieser Rollen auf die geforderte zu?
-	return false;														// Wenn keine zutraf, ist der Nutzer nicht autorisiert
+	foreach ($roles as $role) { if ($role == $scope) { return true; } }	// Does one of the roles match with the required one?
+	return false;														// If no role does, the user isn't authorized
 }
 
 function roles($roles) {

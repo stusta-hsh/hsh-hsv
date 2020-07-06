@@ -15,7 +15,7 @@ this website.
 | `password` | varchar(255) | | The user's password, hashed with PHPs password hashing extension, which by now uses bcrypt (PHP 5.5.0).
 | `email` | varchar(50) | | The user's email address.
 
-The table `user_roles` assigns authorisation roles to the users. More information on authorisation can be found in [readme.md].
+The table `user_roles` assigns authorization roles to the users. More information on authorization can be found in [readme.md].
 
 | Column	| Datatype	| Attriutes | Description
 | ---		| ---		| ---		| ---

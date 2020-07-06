@@ -53,15 +53,43 @@ endpoint and itself includes the `db.php` file mentioned above.
 This functions simplify the handling of messages between the client and the server.
 
 *	`output($obj)`: Encodes a given object to JSON and echoes it back to the requester.
+
 	Instead of directly echoing JSON in the endpoints, this function should be used. This makes it
 	possible for a endpoint function to quickly use results from other endpoint functions, as these
 	retrurn a PHP object instead of echoing a string.
 
-*	`require_param`: Simplifies the handling of wrong requests. The function checks whether the
-	given variable exists. If it does, the variable is returned, if not, the request is rejected
-	with the HTTP stats code 401 (Bad request) and the script is aborted.
+*	`require_param`: Simplifies the handling of wrong requests.
+
+	The function checks whether the	given variable exists. If it does, the variable is returned,
+	if not, the request is rejected	with the HTTP stats code 401 (Bad request) and the script is aborted.
 
 	It is intended to be used like this:
 	```
 	$user = require_param($_POST['user']);
 	```
+
+
+### Authorization Functions
+This functions provide access control features for the API endpoints.
+
+*	`authenticate`: Before a user becomes authorized to do something, it needs to be verified,
+	that the user is who he claims to be.
+
+	Authentication is achieved here through PHP sessions. After a user [logs in](/user.md), a
+	cookie with an cryptic session ID is stored on the client. Information about this session,
+	like the users ID, is saved on the server, invisible for the user.
+
+	If you want to authenticate the user, you need to check whether a session exists with the
+	ID specified in the request.
+
+	This function returns the user ID of the currently logged in user.
+
+*	`authorize`: In order to grant access to something, you first need to authenticate the user,
+	determine the roles he holds an compare them to the required role. If they match, access is
+	granted.
+
+	The roles a user holds are listed in the table [`user_roles`](db.md); the role tree is specified
+	in the file `roles.json` (In a file, not the database, because the file can be statically loaded
+	into the servers memory, and recursive querys in SQL are impossible or at least inefficient).
+
+	This function returns a boolean value, whether the user is authorized or not.
