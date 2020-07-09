@@ -75,7 +75,7 @@ This functions provide access control features for the API endpoints.
 *	`authenticate`: Before a user becomes authorized to do something, it needs to be verified,
 	that the user is who he claims to be.
 
-	Authentication is achieved here through PHP sessions. After a user [logs in](./user.md), a
+	Authentication is achieved here through PHP sessions. After a user [logs in](./user/readme.md), a
 	cookie with an cryptic session ID is stored on the client. Information about this session,
 	like the users ID, is saved on the server, invisible for the user.
 
