@@ -5,7 +5,7 @@ include('../api.php');
 // Verwertung der Eingabe
 switch ($_GET['q']) {
 	case 'login': output(login()); break;
-	case 'logout': output(logout()); break;
+	case 'create': output(create()); break;
 	default: break;
 }
 
@@ -39,11 +39,13 @@ function login() {
 	}
 }
 
-function logout() {
-
+function create() {
+	$name = require_param($_POST['name']);					// The request must contain at least a name for the new user
+	$firstName = $_POST['firstName'] ?: "";
+	$lastName = $_POST['lastName'] ?: "";
+	$email = $_POST['email'] ?: "";
+	
+	$insertId = dm_prepared("INSERT INTO users (name, first_name, last_name, email) VALUES (?,?,?,?)", "ssss", $name, $firstName, $lastName, $email);
+	return q_firstRow("SELECT * FROM users WHERE id = $insertId");
 }
-
-
-
-
 ?>
