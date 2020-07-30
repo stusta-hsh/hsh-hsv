@@ -6,6 +6,8 @@ include('../api.php');
 switch ($_GET['q']) {
 	case 'login': output(login()); break;
 	case 'create': output(create()); break;
+	case 'register': output(register()); break;
+	case 'reset_password': output(reset_password()); break;
 	default: break;
 }
 
@@ -47,5 +49,29 @@ function create() {
 	
 	$insertId = dm_prepared("INSERT INTO users (name, first_name, last_name, email) VALUES (?,?,?,?)", "ssss", $name, $firstName, $lastName, $email);
 	return q_firstRow("SELECT * FROM users WHERE id = $insertId");
+}
+
+function register() {
+	$user = require_param($_GET['user']);
+	$password = require_param($_POST['password']);
+
+	//don't reset the password of already registeres users
+	if(!qp_firstField("SELECT (CASE WHEN password = '' THEN 1 ELSE 0 END) FROM users WHERE id = ?", "i", $user)) {
+		http_response_code(401);
+		exit;
+	}
+
+	$hash = password_hash($password, PASSWORD_DEFAULT);
+	dm_prepared("UPDATE users SET password = '$hash' WHERE id = ?", "i", $user);
+	return true;
+}
+
+function reset_password() {
+	$user = authenticate();
+	$password = require_param($_POST['password']);
+
+	$hash = password_hash($password, PASSWORD_DEFAULT);
+	query("UPDATE users SET password = '$hash' WHERE id = $user");
+	return true;
 }
 ?>

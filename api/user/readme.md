@@ -28,3 +28,27 @@ Creates an entry in the users table to work with. The user can't log in yet.
 	*	`email`: Email address of the user (optional)
 *	Returns:
 	*	`200`: the created user entry
+
+
+## Register
+
+*	URL: `https://hsh.stusta.de/api/user/?q=register`
+*	Method: `POST`
+*	Authentication: None
+*	Parameters:
+	*	`user`: The user ID
+	*	`password`: The password to be set
+*	Returns:
+	*	`200`: the created user entry
+	*	`401`: the user is already registered
+
+## Reset Password
+
+*	URL: `https://hsh.stusta.de/api/user/?q=reset_password`
+*	Method: `POST`
+*	Authentication: The user can only reset it's own password
+*	Parameters:
+	*	`password`: The password to be set
+*	Returns:
+	*	`200`: the created user entry
+	*	`401`: no user is logged in
