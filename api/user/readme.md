@@ -9,11 +9,13 @@ in the self administration.
 *   Method: `POST`
 *   Authentication: None
 *   Parameters:
-	*   `user`: the ID of the user to log in
+	*   `email`: the user's email
 	*   `password`: the user's password (in plaintext)
 *   Returns:
 	*   `200`: if the login was successfull
-	*   `401`: if the login was not successfull
+	*   `401`: if the login was not successfull.
+		This can happen when the provided email is unknown or the password is incorrect.
+		For data protection reasons these situations are handled in the same way.
 
 ## Create
 Creates an entry in the users table to work with. The user can't log in yet.
