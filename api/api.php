@@ -14,8 +14,7 @@ function output($obj) {
 function require_param($param) {
 	if ($param) { return $param; }
 	else {
-		http_response_code(400);
-		exit();
+		http_error(400, "The request misses a required argument.");
 	}
 }
 
@@ -32,8 +31,7 @@ function authenticate() {
 		return $_SESSION['id'];
 	}
 	else {
-		http_response_code(401);
-		exit();
+		http_error(401, "User needs to be logged in for that action");
 	}
 }
 
@@ -56,6 +54,12 @@ function roles($roles) {
 		$newroles = array_merge($newroles, roles($roletree->{$role}->{'is-a'}));
 	}
 	return array_unique($newroles, SORT_NUMERIC);
+}
+
+function http_error($code, $msg) {
+	http_response_code($code);
+	echo($msg);
+	exit();
 }
 
 ?>

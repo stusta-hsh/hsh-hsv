@@ -36,9 +36,7 @@ function login() {
 		return true;
 	}
 	else {
-		// ** User not authenticated **
-		http_response_code(401);
-		exit;
+		http_error(401, "The provided credentials don't match");
 	}
 }
 
@@ -53,18 +51,32 @@ function create() {
 }
 
 function register() {
-	$user = require_param($_GET['user']);
+	$name = require_param($_POST['name']);
+	$email = require_param($_POST['email']);
 	$password = require_param($_POST['password']);
+	$firstName = $_POST['firstName'] ?: "";
+	$lastName = $_POST['lastName'] ?: "";
 
-	//don't reset the password of already registeres users
-	if(!qp_firstField("SELECT (CASE WHEN password = '' THEN 1 ELSE 0 END) FROM users WHERE id = ?", "i", $user)) {
-		http_response_code(401);
-		exit;
+	if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+		http_error(400, "Invalid Email format");
+	}
+	
+	$hash = password_hash($password, PASSWORD_DEFAULT);
+	$code = bin2hex(random_bytes(10));
+
+	$insertId = dm_prepared("INSERT INTO users (name, first_name, last_name, password, email) VALUES (?,?,?,'$hash',?)", "ssss", $name, $firstName, $lastName, $email);
+	if(!insertId) { http_error(400, "User could not be registered. Probably the email already exists."); }
+
+	query("INSERT INTO user_verification (user, code) VALUES ($insertId, $code)");
+
+	$subject = "Your registration at HSH";
+	$message = "Hello $name,\r\nto complete your registration at the HSH page, click this link: <a>hsh.stusta.de/api/user/?q=verify&code=$code</a>";
+	$headers = "from: noreply@stusta.de";
+	if(!mail($email, $subject, $message, $headers)) {
+		http_error(500, "Registration email could not be sent");
 	}
 
-	$hash = password_hash($password, PASSWORD_DEFAULT);
-	dm_prepared("UPDATE users SET password = '$hash' WHERE id = ?", "i", $user);
-	return true;
+	return q_firstRow("SELECT * FROM users WHERE id = $insertId");
 }
 
 function reset_password() {
@@ -75,4 +87,13 @@ function reset_password() {
 	query("UPDATE users SET password = '$hash' WHERE id = $user");
 	return true;
 }
+
+/*function merge() {
+	$merger = authenticate();
+	
+	$u1 = require_param($_POST['primary_user']);
+	$u2 = require_param($_POST['secondary_user']);
+
+
+}*/
 ?>
