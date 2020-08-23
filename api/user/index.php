@@ -7,6 +7,7 @@ switch ($_GET['q']) {
 	case 'login': output(login()); break;
 	case 'create': output(create()); break;
 	case 'register': output(register()); break;
+	case 'verify': output(verify()); break;
 	case 'reset_password': output(reset_password()); break;
 	default: break;
 }
@@ -64,19 +65,45 @@ function register() {
 	$hash = password_hash($password, PASSWORD_DEFAULT);
 	$code = bin2hex(random_bytes(10));
 
+	// insert in user table
+	transaction_start();
 	$insertId = dm_prepared("INSERT INTO users (name, first_name, last_name, password, email) VALUES (?,?,?,'$hash',?)", "ssss", $name, $firstName, $lastName, $email);
-	if(!insertId) { http_error(400, "User could not be registered. Probably the email already exists."); }
+	if(!insertId) {
+		transaction_rollback();
+		http_error(400, "User could not be registered. Probably the email already exists.");
+	}
 
-	query("INSERT INTO user_verification (user, code) VALUES ($insertId, $code)");
-
+	// Send verification email to user
+	query("INSERT INTO user_verification (user, code) VALUES ($insertId, '$code')");
 	$subject = "Your registration at HSH";
 	$message = "Hello $name,\r\nto complete your registration at the HSH page, click this link: <a>hsh.stusta.de/api/user/?q=verify&code=$code</a>";
 	$headers = "from: noreply@stusta.de";
-	if(!mail($email, $subject, $message, $headers)) {
+	/*if(!mail($email, $subject, $message, $headers)) {
+		transaction_rollback();
 		http_error(500, "Registration email could not be sent");
-	}
+	}*/
 
+	transaction_commit();
 	return q_firstRow("SELECT * FROM users WHERE id = $insertId");
+	return true;
+}
+
+function verify() {
+	$user = require_param($_POST['user']);
+	$code = require_param($_POST['code']);
+
+	transaction_start();
+	$servercode = qp_firstField("SELECT code FROM user_verification WHERE user = ?", "i", $user);
+	if ($servercode == $code) {
+		dm_prepared("UPDATE users SET verified = 1 WHERE id = ?", "i", $user);
+		dm_prepared("DELETE FROM user_verification WHERE user = ?", "i", $user);
+		transaction_commit();
+		return true;
+	}
+	else {
+		transaction_rollback();
+		http_error(400, "Invalid verification link");
+	}
 }
 
 function reset_password() {

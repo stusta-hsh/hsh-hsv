@@ -33,4 +33,17 @@ function dm_prepared($sql, $types, ...$params) {
 	if (!mysqli_stmt_execute($stmt)) { echo(mysqli_error($db)); }
 	return mysqli_insert_id($db);
 }
+
+function transaction_start() {
+	global $db;
+	mysqli_begin_transaction($db);
+}
+function transaction_commit() {
+	global $db;
+	mysqli_commit($db);
+}
+function transaction_rollback() {
+	global $db;
+	mysqli_rollback($db);
+}
 ?>

@@ -18,6 +18,12 @@ function require_param($param) {
 	}
 }
 
+function http_error($code, $msg) {
+	http_response_code($code);
+	echo($msg);
+	exit();
+}
+
 // -----------------------
 // Authorization functions
 // -----------------------
@@ -55,11 +61,4 @@ function roles($roles) {
 	}
 	return array_unique($newroles, SORT_NUMERIC);
 }
-
-function http_error($code, $msg) {
-	http_response_code($code);
-	echo($msg);
-	exit();
-}
-
 ?>
