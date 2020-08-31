@@ -115,12 +115,42 @@ function reset_password() {
 	return true;
 }
 
-/*function merge() {
-	$merger = authenticate();
+function merge() {
+	authorize(0);
+	//$merger = authenticate();
 	
-	$u1 = require_param($_POST['primary_user']);
-	$u2 = require_param($_POST['secondary_user']);
+	$uid1 = require_param($_POST['primary_user']);
+	$uid2 = require_param($_POST['secondary_user']);
 
+	$user1 = qp_firstRow("SELECT * FROM users WHERE id=?", "i", $uid1);
+	$user2 = qp_firstRow("SELECT * FROM users WHERE id=?", "i", $uid2);
 
-}*/
+	merge_property($user1, $user2, 'name');
+	merge_property($user1, $user2, 'first_name');
+	merge_property($user1, $user2, 'last_name');
+	merge_property($user1, $user2, 'password');
+	merge_property($user1, $user2, 'email');
+	merge_property($user1, $user2, 'verified');
+
+	dm_prepared("UPDATE users SET name=?, first_name=?, last_name=?, password=?, email=?, verified=? WHERE id=?", 'sssssii', 
+		$user1['name'], $user1['first_name'], $user1['last_name'], $user1['password'], $user1['email'], $user1['verified'], $user1['id']);
+	dm_prepared("DELETE FROM users WHERE id=?", "i", $uid2);
+}
+
+function merge_property(&$o1, &$o2, $property) {
+	if ($o1[$property] == $o2[$property])
+		return true;
+
+	if ($o1[$property] == null || $o1[$property] == "" || $o1[$property] == 0) {
+		$o1[$property] = $o2[$property];
+		return true;
+	}
+
+	if ($o2[$property] == null || $o2[$property] == "" || $o2[$property] == 0) {
+		$o2[$property] = $o1[$property];
+		return true;
+	}
+
+	return false;
+}
 ?>
