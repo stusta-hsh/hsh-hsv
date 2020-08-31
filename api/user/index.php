@@ -20,7 +20,7 @@ switch ($_GET['q']) {
 
 function me() {
 	$myid = authenticate();
-	$me = query("SELECT * FROM users WHERE id=$myid");
+	$me = q_firstRow("SELECT * FROM users WHERE id=$myid");
 	return $me;
 }
 
