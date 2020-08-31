@@ -4,17 +4,25 @@ include('../api.php');
 
 // Verwertung der Eingabe
 switch ($_GET['q']) {
+	case 'me': output(me()); break;
 	case 'login': output(login()); break;
 	case 'create': output(create()); break;
 	case 'register': output(register()); break;
 	case 'verify': output(verify()); break;
 	case 'reset_password': output(reset_password()); break;
+	case 'merge': outpur(merge()); break;
 	default: break;
 }
 
 // --------------
 // API-Funktionen
 // --------------
+
+function me() {
+	$myid = authenticate();
+	$me = q_firstRow("SELECT * FROM users WHERE id=$myid");
+	return $me;
+}
 
 function login() {
 	$email = require_param($_POST['email']);				// The request must contain the users email address
