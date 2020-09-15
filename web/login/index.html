@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+
+<script src="../../lib/jquery-3.5.1.js"></script>
+
+<body>
+	<h3>HSH Login</h3>
+	
+	<label for="username">Email:</label><br/>
+	<input type="email" id="email" name="email"/><br/>
+	<label for="pwd">Password:</label><br/>
+	<input type="password" id="password" name="password"/><br/>
+	<button>Login</button>
+</body>
+
+<script>
+
+$("button").click(function() {
+	$.post("../../api/user/login",
+		"email=" + $("#email").val() + "&password=" + $("#password").val(),
+		function(data, status) {
+			if(status == 200) {
+				windows.location.href = "../index.html";
+			}
+		});
+})
+
+</script>
+</html>

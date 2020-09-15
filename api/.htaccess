@@ -1,0 +1,2 @@
+RewriteEngine on
+RewriteRule ^([a-z]+)/([a-z]+)(/.+)? $1.php?q=$2&u=$3
