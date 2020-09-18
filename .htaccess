@@ -1,0 +1,4 @@
+RewriteEngine on
+
+# /login -> /web/login.html
+RewriteRule ^(.*)$ web/$1.html [END]

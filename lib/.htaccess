@@ -1,0 +1,2 @@
+# dont apply any other rewrite rule to this folder (let everything pass)
+RewriteRule . - [END]
