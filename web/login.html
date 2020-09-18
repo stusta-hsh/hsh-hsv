@@ -19,9 +19,7 @@ $("button").click(function() {
 	$.post("api/user/login",
 		"email=" + $("#email").val() + "&password=" + $("#password").val(),
 		function(data, status) {
-			if(status == 200) {
-				windows.location.href = "../index.html";
-			}
+			window.location.href = "index";
 		});
 })
 
