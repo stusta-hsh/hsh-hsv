@@ -84,7 +84,7 @@ function register() {
 	// Send verification email to user
 	query("INSERT INTO user_verification (user, code) VALUES ($insertId, '$code')");
 	$subject = "Your registration at HSH";
-	$message = "Hello $name,\r\nto complete your registration at the HSH page, click this link: <a>hsh.stusta.de/api/user/?q=verify&code=$code</a>";
+	$message = "Hello $name,\r\nto complete your registration at the HSH page, click this link: <a>hsh.stusta.de/api/user/verify?user=$insertId&code=$code</a>";
 	$headers = "from: noreply@stusta.de";
 	/*if(!mail($email, $subject, $message, $headers)) {
 		transaction_rollback();
@@ -97,8 +97,8 @@ function register() {
 }
 
 function verify() {
-	$user = require_param($_POST['user']);
-	$code = require_param($_POST['code']);
+	$user = require_param($_GET['user']);
+	$code = require_param($_GET['code']);
 
 	transaction_start();
 	$servercode = qp_firstField("SELECT code FROM user_verification WHERE user = ?", "i", $user);
@@ -106,7 +106,7 @@ function verify() {
 		dm_prepared("UPDATE users SET verified = 1 WHERE id = ?", "i", $user);
 		dm_prepared("DELETE FROM user_verification WHERE user = ?", "i", $user);
 		transaction_commit();
-		return true;
+		return "You have successfully verified your HSH account.";
 	}
 	else {
 		transaction_rollback();
