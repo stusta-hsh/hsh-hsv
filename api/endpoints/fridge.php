@@ -37,7 +37,7 @@ function surrAccountingDates() {
 function categories() {
 	$floor = require_param($_GET['u']);
 	$date = $_GET['date'] ?? date('Y-m-d');
-	return qp_assocArray(
+	return qp_fetch(
 		"SELECT id, name, value
 		FROM fridge_categories c
 		WHERE floor = ? AND c.date = (SELECT MAX(date) FROM fridge_categories WHERE id = c.id AND date <= ?)",
@@ -62,7 +62,7 @@ function accounts() {
 	$sql = substr($sql, 0, -5); // letztes AND entfernen
 	$sql .= ") ORDER BY (CASE WHEN r.house IS NULL THEN u.name ELSE r.house END), r.floor, r.room";
 	
-	return q_assocArray($sql);
+	return query($sql);
 }
 
 function invoice() {
