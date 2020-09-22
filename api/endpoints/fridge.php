@@ -84,7 +84,7 @@ function invoice() {
 	WHERE (account.amount - IFNULL(payments.amount, 0) - IFNULL(donated.amount, 0) + IFNULL(recieved.amount, 0)) <> 0
 	ORDER BY (CASE WHEN r.house IS NULL THEN 20 ELSE r.house END), r.floor, r.room, u.name";
 
-	return q_assocArray($sql);
+	return qp_fetch($sql);
 }
 
 ?>
