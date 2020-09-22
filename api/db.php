@@ -13,6 +13,7 @@ function query($sql) { global $db; return mysqli_query($db, $sql); }
 function q_firstField($sql) { return mysqli_fetch_row(query($sql))[0]; }
 function q_firstRow($sql) { return mysqli_fetch_array(query($sql), MYSQLI_ASSOC); }
 function q_firstColumn($sql) { return array_map(function ($a) { return $a[0]; }, mysqli_fetch_all(query($sql))); }
+function q_fetch($sql) { return mysqli_fetch_all(query($sql), MYSQLI_ASSOC); }
 
 // prepared query functions
 function query_prepared($sql, $types, ...$params) {
