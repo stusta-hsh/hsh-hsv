@@ -9,7 +9,7 @@ switch ($_GET['q']) {
 	case 'categories': output(categories()); break;
 	case 'accounts': output(accounts()); break;
 	case 'invoice': output(invoice()); break;
-	default: http_response_code(400); exit;
+	default: http_error(400, "the requested endpoint \"$_GET[q]\" doesn't exist"); exit;
 }
 
 // --------------
@@ -27,9 +27,9 @@ function surrAccountingDates() {
 	$floor = require_param($_GET['u']);
 	$date = $_GET['date'] ?? currAccountingDate();
 	return array(
-		'prev' => q_firstField("SELECT MAX(date) FROM fridge_accounts WHERE floor = $floor AND date < '$date'"),
+		'prev' => qp_firstField("SELECT MAX(date) FROM fridge_accounts WHERE floor = ? AND date < ?", "is", $floor, $date),
 		'sel' => $date,
-		'next' => q_firstField("SELECT MIN(date) FROM fridge_accounts WHERE floor = $floor AND date > '$date'"),
+		'next' => qp_firstField("SELECT MIN(date) FROM fridge_accounts WHERE floor = ? AND date > ?", "is", $floor, $date)
 	);
 }
 
@@ -37,10 +37,11 @@ function surrAccountingDates() {
 function categories() {
 	$floor = require_param($_GET['u']);
 	$date = $_GET['date'] ?? date('Y-m-d');
-	return q_assocArray(
+	return qp_assocArray(
 		"SELECT id, name, value
 		FROM fridge_categories c
-		WHERE floor = $floor AND c.date = (SELECT MAX(date) FROM fridge_categories WHERE id = c.id AND date <= '$date')");
+		WHERE floor = ? AND c.date = (SELECT MAX(date) FROM fridge_categories WHERE id = c.id AND date <= ?)",
+		"is", $floor, $date);
 }
 
 // returns a accounting table to a specific date
