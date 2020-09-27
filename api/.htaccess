@@ -1,4 +1,4 @@
 RewriteEngine on
 
 # /api/example/foo/bar -> /api/endpoints/example.php?q=foo&u=bar
-RewriteRule ^([a-z]+)/([^/]+)/?(.+)? endpoints/$1.php?q=$2&u=$3 [END]
+RewriteRule ^([a-z]+)/([^/]+) endpoints/$1.php?q=$2 [QSA,END]

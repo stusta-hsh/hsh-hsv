@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Getränkeliste</title>
+</head>
+
+<script src="../lib/jquery-3.5.1.js"></script>
+
+<body>
+	<p id='da'/>
+	<table id="table">
+		<tr> <!-- Fußzeile -->
+			<td>
+				<input id='textAdd' onkeydown="textAdd_keydown(event)" oninput="textAdd_input(event)" autocomplete="off" style='width: 300px'/> <hr/>
+				<select id='opts' size='3' style='width: 300px'/>
+			</td>
+		</tr>
+	</table>
+</body>
+
+<script>
+
+var params = new URLSearchParams(window.location.search);
+var ajaxParams = $.extend({}, {
+	date: params.get('date') ?? undefined,
+	floor: params.get('floor') ?? undefined
+});
+
+$.get("../api/fridge/accounts", ajaxParams)
+	.done(function(data) {
+		data.forEach(user => {
+			$("#table").append('<tr><td>' + user.name + '</td></tr>');
+		});
+	})
+	.fail(function(data) {
+		alert(data.responseText);
+	});
+
+function textAdd_input(event) {
+	if (textAdd.value == '') { return; }
+	$.get("api/fridge/userSuggestions/" + $("#textAdd").val() + "?date=" + date, function(data, status) {
+		$("#opts").innerHTML = "";
+		names = JSON.parse(data);
+		for (i = 0; i < names.length; i++) {
+			entry = $("#opts").appendChild(document.createElement("option"));
+			entry.value = names[i].id;
+			entry.innerHTML = names[i].name;
+		}
+		$("#opts").options[0].selected = true;
+	});
+}
+
+function textAdd_keydown(event) {
+	if (event.keyCode === 40) 		{ $("#opts").selectedIndex++; event.preventDefault(); }	// Pfeil nach unten -> nächstes Element in der Liste selektieren
+	else if (event.keyCode === 38)	{ $("#opts").selectedIndex--; event.preventDefault(); }	// Pfeil nach oben -> vorheriges Element selektieren
+	else if (event.keyCode === 13)	{														// Enter-Taste
+		event.preventDefault();
+		for (row of $(".account_row")) {
+			if (row.getAttribute('value') === $("#opts").value) {							// wenn der User, der hinzugefügt werden soll, schon vorhanden ist
+				row.children[1].firstElementChild.focus();									// den Fokus auf seine Zeile setzen
+				$("#textAdd").value = ""; $("#opts").innerHTML = "";
+				return;
+			}
+		}																					// Ansonsten: neue Zeile für User hinzufügen
+		var newrow = document.getElementById("table").insertRow(++count_results);			// Neue Zeile erstellen und in Tabelle einfügen
+		var c0 = newrow.insertCell(0); c0.innerHTML = $("#opts").selectedOptions[0].text;	// Erste Spalte: Name
+		for (i = 0; i < count_categories; i++) {											// Restliche Spalten: Formularfelder
+			var c = newrow.insertCell(i+1);
+			c.innerHTML = "<input class=\'account_input\' type=\'number\' min=\'0\' step=\'1\' id=\'" + $("#opts").value + "-" + i + "\' value=\'0\' onchange=\'accountInput_change(event)\'/>";
+			if (i == 0) { c.children[0].focus(); }											// Das erste Feld fokussieren
+		}
+		$("#textAdd").value = ""; $("#opts").innerHTML = "";								// Inputfeld leeren
+	}
+}
+
+</script>
+</html>

@@ -37,10 +37,13 @@ function login() {
 		session_set_cookie_params(0, '/', '.stusta.de', true, true);
 		session_start();
 		
+		$date = date('Y-m-d');
 		$user = qp_firstRow("SELECT id, name, first_name, last_name, email FROM users WHERE email = ?", "s", $email);
+		$room = qp_firstRow("SELECT house, floor, room, date, end FROM rooms r WHERE r.user = ? AND '$date' BETWEEN r.date AND (CASE WHEN r.end IS NULL THEN '$date' ELSE r.end END)", "i", $user);
+		
 		$_SESSION['id'] = $user['id'];
 		$_SESSION['user'] = $user;
-		$_SESSION['room'] = qp_firstRow("SELECT house, floor, room, date, end FROM rooms r WHERE r.user = ? AND '$date' BETWEEN r.date AND (CASE WHEN r.end IS NULL THEN '$date' ELSE r.end END)", "s", $user);
+		$_SESSION['room'] = $room;
 		
 		return true;
 	}

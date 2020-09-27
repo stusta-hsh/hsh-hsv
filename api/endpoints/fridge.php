@@ -2,6 +2,9 @@
 
 include('../api.php');
 
+session_name('hshsession');
+session_start();
+
 // Verwertung der Eingabe
 switch ($_GET['q']) {
 	case 'currAccountingDate': output(currAccountingDate()); break;
@@ -17,14 +20,14 @@ switch ($_GET['q']) {
 // --------------
 
 function currAccountingDate() {
-	$floor = require_param($_GET['u']);
+	$floor = $_GET['floor'] ?? $_SESSION['room']['floor'];
 	$date = date('Y-m-d');
 	return qp_firstField("SELECT MAX(date) FROM fridge_accounts WHERE floor = ? AND date < ?", "is", $floor, $date);
 }
 
 // Returns the preceeding and the following accounting date 
 function surrAccountingDates() {
-	$floor = require_param($_GET['u']);
+	$floor = $_GET['floor'] ?? $_SESSION['room']['floor'];
 	$date = $_GET['date'] ?? currAccountingDate();
 	return array(
 		'prev' => qp_firstField("SELECT MAX(date) FROM fridge_accounts WHERE floor = ? AND date < ?", "is", $floor, $date),
@@ -35,7 +38,7 @@ function surrAccountingDates() {
 
 // Returns the existing drink categories with their prices to a specific time
 function categories() {
-	$floor = require_param($_GET['u']);
+	$floor = $_GET['floor'] ?? $_SESSION['room']['floor'];
 	$date = $_GET['date'] ?? date('Y-m-d');
 	return qp_fetch(
 		"SELECT id, name, value
@@ -46,9 +49,9 @@ function categories() {
 
 // returns a accounting table to a specific date
 function accounts() {
-	$floor = require_param($_GET['u']);
-	authorize(1100 + $floor);
-	
+	$floor = $_GET['floor'] ?? $_SESSION['room']['floor'];
+	if (!authorize(1100 + $floor)) { http_error(401, "You need to be the fridge administrator for this action"); }
+
 	$date = $_GET['date'] ?? currAccountingDate();
 	$categories = categories();
 	$categories_count = count($categories);
