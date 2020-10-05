@@ -8,14 +8,27 @@
 <script src="../lib/jquery-3.5.1.js"></script>
 
 <body>
-	<p id='da'/>
+	<div id='header'>
+		<a id='prev'>*</a>
+		< <span id='curr'></span> >
+		<a id='next'>*</a>
+	</div>
 	<table id="table">
-		<tr> <!-- Fußzeile -->
-			<td>
-				<input id='textAdd' onkeydown="textAdd_keydown(event)" oninput="textAdd_input(event)" autocomplete="off" style='width: 300px'/> <hr/>
-				<select id='opts' size='3' style='width: 300px'/>
-			</td>
-		</tr>
+		<thead>
+			<tr id='headline'>
+				<td/>
+			</tr>
+		</thead>
+		<tbody>
+		</tbody>
+		<tfoot>
+			<tr>
+				<td>
+					<input id='textAdd' onkeydown="textAdd_keydown(event)" oninput="textAdd_input(event)" autocomplete="off" style='width: 300px'/> <hr/>
+					<select id='opts' size='3' style='width: 300px'/>
+				</td>
+			</tr>
+		</tfoot>
 	</table>
 </body>
 
@@ -29,8 +42,18 @@ var ajaxParams = $.extend({}, {
 
 $.get("../api/fridge/accounts", ajaxParams)
 	.done(function(data) {
-		data.forEach(user => {
-			$("#table").append('<tr><td>' + user.name + '</td></tr>');
+		// Dates
+		$('#prev').html(data.dates.prev ?? '*').attr('href', '?' + $.param($.extend({date: data.dates.prev}, { floor: ajaxParams.floor ?? undefined })));
+		$('#next').html(data.dates.next ?? '*').attr('href', '?' + $.param($.extend({date: data.dates.next}, { floor: ajaxParams.floor ?? undefined })));
+
+		// Categories
+		data.categories.forEach(category => {
+			$("#headline").append(`<th> ${category.name} (${category.value}€) </th>`);
+		})
+
+		// Accounts
+		data.accounts.forEach(user => {
+			$("#table").append(`<tr><td> ${user.name} (${(user.house == 9 ? '' : user.house + '/') + (100*user.floor + 1*user.room)}) </td></tr>`);
 		});
 	})
 	.fail(function(data) {

@@ -65,7 +65,11 @@ function accounts() {
 	$sql = substr($sql, 0, -5); // letztes AND entfernen
 	$sql .= ") ORDER BY (CASE WHEN r.house IS NULL THEN u.name ELSE r.house END), r.floor, r.room";
 	
-	return q_fetch($sql);
+	return array(
+		'dates' => surrAccountingDates(),
+		'categories' => $categories,
+		'accounts' => q_fetch($sql)
+	);
 }
 
 function invoice() {
