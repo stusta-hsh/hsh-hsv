@@ -57,18 +57,38 @@ function accounts() {
 	$categories_count = count($categories);
 
 	$sql = "SELECT u.id, u.name, r.house, r.floor, r.room";
-	for ($i = 0; $i < $categories_count; $i++) { $sql .= ", (CASE WHEN t$i.amount IS NOT NULL THEN t$i.amount ELSE 0 END) AS " . $categories[$i]['name']; }
+	for ($i = 0; $i < $categories_count; $i++) { $sql .= ", (CASE WHEN t$i.amount IS NOT NULL THEN t$i.amount ELSE 0 END) AS a$i"; }
 	$sql .= " FROM users u LEFT JOIN rooms r ON (r.user = u.id AND '$date' BETWEEN r.date AND (CASE WHEN r.end IS NULL THEN '" . date('Y-m-d') . "' ELSE r.end END))";
 	for ($i = 0; $i < $categories_count; $i++) { $sql .= " LEFT JOIN fridge_accounts t$i ON (t$i.user = u.id AND t$i.floor = $floor AND t$i.category = $i AND t$i.date = '$date')"; }
 	$sql .= " WHERE NOT (";
 	for ($i = 0; $i < $categories_count; $i++) { $sql .= "t$i.amount IS NULL AND "; }
 	$sql = substr($sql, 0, -5); // letztes AND entfernen
 	$sql .= ") ORDER BY (CASE WHEN r.house IS NULL THEN u.name ELSE r.house END), r.floor, r.room";
-	
+
+	$accounts = array();
+	$qu = q_fetch($sql);
+	foreach ($qu as $q) {
+		$a = array();
+		for ($i = 0; $i < $categories_count; $i++) { $a[$i] = 0+$q["a$i"]; }
+		$o = array(
+			'user' => array(
+				'id' => 0+ $q['id'],
+				'name' => $q['name']
+			),
+			'room' => array(
+				'house' => 0+$q['house'],
+				'floor' => 0+$q['floor'],
+				'room' => 0+$q['room']
+			),
+			'account' => $a
+		);
+		array_push($accounts, $o);
+	}
+
 	return array(
 		'dates' => surrAccountingDates(),
 		'categories' => $categories,
-		'accounts' => q_fetch($sql)
+		'accounts' => $accounts
 	);
 }
 

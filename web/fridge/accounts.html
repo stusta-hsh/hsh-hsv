@@ -34,6 +34,7 @@
 
 <script>
 
+var categories;
 var params = new URLSearchParams(window.location.search);
 var ajaxParams = $.extend({}, {
 	date: params.get('date') ?? undefined,
@@ -50,10 +51,17 @@ $.get("../api/fridge/accounts", ajaxParams)
 		data.categories.forEach(category => {
 			$("#headline").append(`<th> ${category.name} (${category.value}€) </th>`);
 		})
+		categories = data.categories;
 
 		// Accounts
-		data.accounts.forEach(user => {
-			$("#table").append(`<tr><td> ${user.name} (${(user.house == 9 ? '' : user.house + '/') + (100*user.floor + 1*user.room)}) </td></tr>`);
+		data.accounts.forEach(a => {
+			userLine = `<tr><td> ${a.user.name} (${(a.room.house == 9 ? '' : a.room.house + '/') + (100*a.room.floor + 1*a.room.room)}) </td>`;
+			for (i = 0; i < categories.length; i++) { 
+				userLine += `<td><input class="accountInput" type="number" min="0" step="1" onchange="accountInput_change(event)"
+					id="${a.user.id}-${i}" value="${a.account[i]}"></td>`;
+			}
+			userLine += `</td>`;
+			$("#table").append(userLine);
 		});
 	})
 	.fail(function(data) {
