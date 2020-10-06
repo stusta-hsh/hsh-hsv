@@ -76,16 +76,19 @@ $.get("../api/fridge/accounts", ajaxParams)
 
 function textAdd_input(event) {
 	if (textAdd.value == '') { return; }
-	$.get("api/fridge/userSuggestions/" + $("#textAdd").val() + "?date=" + date, function(data, status) {
-		$("#opts").innerHTML = "";
-		names = JSON.parse(data);
-		for (i = 0; i < names.length; i++) {
-			entry = $("#opts").appendChild(document.createElement("option"));
-			entry.value = names[i].id;
-			entry.innerHTML = names[i].name;
-		}
-		$("#opts").options[0].selected = true;
-	});
+	$.get("../api/user/suggest", { query: $("#textAdd").val(), date: ajaxParams.date })
+		.done(function(data) {
+			$("#opts").empty();
+			for (i = 0; i < data.length; i++) {
+				entry = $("#opts").append($("<option />").val(data[i].id).text(data[i].name));
+				//entry.value = data[i].id;
+				//entry.innerHTML = data[i].name;
+			}
+			$("#opts option:first").attr("selected", "selected");
+		})
+		.fail(function(data) {
+			alert(data.responseText);
+		});
 }
 
 function textAdd_keydown(event) {
