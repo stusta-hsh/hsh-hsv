@@ -10,7 +10,8 @@ switch ($_GET['q']) {
 	case 'register': output(register()); break;
 	case 'verify': output(verify()); break;
 	case 'reset_password': output(reset_password()); break;
-	case 'merge': outpur(merge()); break;
+	case 'merge': output(merge()); break;
+	case 'suggest': output(suggest()); break;
 	default: break;
 }
 
@@ -163,5 +164,19 @@ function merge_property(&$o1, &$o2, $property) {
 	}
 
 	return false;
+}
+
+function suggest() {
+	$query = require_param($_GET['query']);
+	$date = $_GET['date'] ?? date('Y-m-d');
+
+	return q_fetch("SELECT u.id, u.name, r.house, r.floor, r.room
+	FROM users u LEFT JOIN rooms r ON (r.user = u.id AND '$date' BETWEEN r.date AND (CASE WHEN r.end IS NULL THEN '" . date('Y-m-d') . "' ELSE r.end END))
+	WHERE
+		CONCAT (u.first_name, ' ', u.last_name, ' ', u.name, ' ',
+			(CASE WHEN r.house IS NULL THEN '' ELSE CONCAT(r.house, '/', LPAD(r.floor, 2, 0), LPAD(r.room, 2, 0)) END))
+		LIKE '%$query%'
+	ORDER BY u.name
+	LIMIT 10");
 }
 ?>
