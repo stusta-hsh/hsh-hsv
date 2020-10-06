@@ -55,7 +55,13 @@ $.get("../api/fridge/accounts", ajaxParams)
 
 		// Accounts
 		data.accounts.forEach(a => {
-			userLine = `<tr><td> ${a.user.name} (${(a.room.house == 9 ? '' : a.room.house + '/') + (100*a.room.floor + 1*a.room.room)}) </td>`;
+			var userLine = "<tr><td>" + a.user.name;
+			switch (a.room.house) {
+				case 0: userLine += " (extern)"; break;
+				case 9: userLine += ` (${100*a.room.floor + 1*a.room.room})`; break;
+				default: userLine += ` (${a.room.house}/${100*a.room.floor + 1*a.room.room})`; break;
+			}
+			userLine += "</td>";
 			for (i = 0; i < categories.length; i++) { 
 				userLine += `<td><input class="accountInput" type="number" min="0" step="1" onchange="accountInput_change(event)"
 					id="${a.user.id}-${i}" value="${a.account[i]}"></td>`;
