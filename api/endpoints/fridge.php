@@ -76,9 +76,9 @@ function accounts() {
 				'name' => $q['name']
 			),
 			'room' => array(
-				'house' => 0+$q['house'],
-				'floor' => 0+$q['floor'],
-				'room' => 0+$q['room']
+				'house' => $q['house'],
+				'floor' => $q['floor'],
+				'room' => $q['room']
 			),
 			'account' => $a
 		);

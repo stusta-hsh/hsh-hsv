@@ -55,13 +55,7 @@ $.get("../api/fridge/accounts", ajaxParams)
 
 		// Accounts
 		data.accounts.forEach(a => {
-			var userLine = "<tr><td>" + a.user.name;
-			switch (a.room.house) {
-				case 0: userLine += " (extern)"; break;
-				case 9: userLine += ` (${100*a.room.floor + 1*a.room.room})`; break;
-				default: userLine += ` (${a.room.house}/${100*a.room.floor + 1*a.room.room})`; break;
-			}
-			userLine += "</td>";
+			var userLine = "<tr><td>" + userNameRoom(a.user.name, a.room.house, a.room.floor, a.room.room) + "</td>";
 			for (i = 0; i < categories.length; i++) { 
 				userLine += `<td><input class="accountInput" type="number" min="0" step="1" onchange="accountInput_change(event)"
 					id="${a.user.id}-${i}" value="${a.account[i]}"></td>`;
@@ -80,9 +74,10 @@ function textAdd_input(event) {
 		.done(function(data) {
 			$("#opts").empty();
 			for (i = 0; i < data.length; i++) {
-				entry = $("#opts").append($("<option />").val(data[i].id).text(data[i].name));
-				//entry.value = data[i].id;
-				//entry.innerHTML = data[i].name;
+				entry = $("#opts")
+					.append($("<option />")
+						.val(data[i].id)
+						.text(userNameRoom(data[i].name, data[i].house, data[i].floor, data[i].room)));
 			}
 			$("#opts option:first").attr("selected", "selected");
 		})
@@ -112,6 +107,16 @@ function textAdd_keydown(event) {
 		}
 		$("#textAdd").value = ""; $("#opts").innerHTML = "";								// Inputfeld leeren
 	}
+}
+
+function userNameRoom(name, house, floor, room) {
+	output = name;
+	switch (house) {
+		case null: output += " (extern)"; break;
+		case '9': output += ` (${100*floor + 1*room})`; break;
+		default: output += ` (${house}/${100*floor + 1*room})`; break;
+	}
+	return output;
 }
 
 </script>
