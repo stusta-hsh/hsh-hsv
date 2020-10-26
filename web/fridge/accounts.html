@@ -24,15 +24,19 @@
 		<tfoot>
 			<tr>
 				<td>
-					<input id='textAdd' onkeydown="textAdd_keydown(event)" oninput="textAdd_input(event)" autocomplete="off" style='width: 300px'/> <hr/>
+					<input id='textAdd' type='text' onkeydown="textAdd_keydown(event)" oninput="textAdd_input(event)" autocomplete="off" style='width: 300px'/> <hr/>
 					<select id='opts' size='3' style='width: 300px'/>
 				</td>
 			</tr>
 		</tfoot>
 	</table>
+	<input id='submit' type='submit' value='Speichern' onclick="submit_click(event)"/>
 </body>
 
 <script>
+
+// Init
+// ====
 
 var categories;
 var params = new URLSearchParams(window.location.search);
@@ -40,6 +44,9 @@ var ajaxParams = $.extend({}, {
 	date: params.get('date') ?? undefined,
 	floor: params.get('floor') ?? undefined
 });
+
+// Events
+// ======
 
 $.get("../api/fridge/accounts", ajaxParams)
 	.done(function(data) {
@@ -110,11 +117,29 @@ function textAdd_keydown(event) {
 	}
 }
 
+function submit_click(event) {
+	var accounts = $(".accountInput").map(function (){
+		return { user: this.getAttribute("user"), category: this.getAttribute("category"), amount: this.value };
+	}).toArray();
+	
+	$.ajax("api/fridge/accounts", {
+		type: "POST",
+		contentType: "application/json",
+		data: JSON.stringify($.extend(ajaxParams, { accounts: accounts})),
+		success: function() {
+			// confirmation
+		}
+	});
+}
+
+// Helpers
+// =======
+
 function addUserRow(id, name, value) {
 	var userLine = `<tr class="accountRow" user_id=${id}> <td>${name}</td>`;
 	for (i = 0; i < categories.length; i++) { 
 		userLine += `<td><input class="accountInput" type="number" min="0" step="1" onchange="accountInput_change(event)"
-			id="${id}-${i}" value="${value == null ? 0 : value[i]}"></td>`;
+			user="${id}" category="${i}" value="${value == null ? 0 : value[i]}"></td>`;
 	}
 	userLine += `</td>`;
 	$("#table").append(userLine);
