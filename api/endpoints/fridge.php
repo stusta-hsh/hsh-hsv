@@ -54,8 +54,9 @@ function accounts() {
 
 function accounts_post() {
 	$sql = ""; $insertSql = ""; $deleteSql = "";
-	$floor = 12; $date = '2020-09-15';
 	$post = param_post();
+	$floor = $post['floor'] ?? $_SESSION['room']['floor'];
+	$date = $post['date'] ?? currAccountingDate();
 	
 	foreach ($post['accounts'] as $account) {
 		$user = $account['user'];
