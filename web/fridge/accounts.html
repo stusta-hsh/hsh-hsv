@@ -132,7 +132,7 @@ function submit_click(event) {
 		contentType: "application/json",
 		data: JSON.stringify($.extend(ajaxParams, { accounts: accounts})),
 		success: function() {
-			// confirmation
+			alert("Sucessfully saved");
 		}
 	});
 }
