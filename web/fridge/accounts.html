@@ -45,9 +45,6 @@ var ajaxParams = $.extend({}, {
 	floor: params.get('floor') ?? undefined
 });
 
-// Events
-// ======
-
 $.get("../api/fridge/accounts", ajaxParams)
 	.done(function(data) {
 		// Dates
@@ -70,6 +67,9 @@ $.get("../api/fridge/accounts", ajaxParams)
 	.fail(function(data) {
 		alert(data.responseText);
 	});
+
+// Events
+// ======
 
 function textAdd_input(event) {
 	if ($("#textAdd").val() == '') { return; }
@@ -122,7 +122,7 @@ function submit_click(event) {
 		return { user: this.getAttribute("user"), category: this.getAttribute("category"), amount: this.value };
 	}).toArray();
 	
-	$.ajax("api/fridge/accounts", {
+	$.ajax("../api/fridge/accounts", {
 		type: "POST",
 		contentType: "application/json",
 		data: JSON.stringify($.extend(ajaxParams, { accounts: accounts})),

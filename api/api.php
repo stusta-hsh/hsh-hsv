@@ -18,6 +18,15 @@ function require_param($param) {
 	}
 }
 
+function param_post() {
+	$post = json_decode(file_get_contents('php://input'), true);
+	
+	if (json_last_error() == JSON_ERROR_NONE) { return $post; }
+	else {
+		http_error(400, "JSON decode error: " . json_last_error_msg());
+	}
+}
+
 function http_error($code, $msg) {
 	http_response_code($code);
 	echo($msg);

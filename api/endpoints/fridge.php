@@ -47,8 +47,42 @@ function categories() {
 		"is", $floor, $date);
 }
 
-// returns a accounting table to a specific date
 function accounts() {
+	if ($_SERVER['REQUEST_METHOD'] == 'POST') { return accounts_post(); }
+	else { return accounts_get(); }
+}
+
+function accounts_post() {
+	$sql = ""; $insertSql = ""; $deleteSql = "";
+	$floor = 12; $date = '2020-09-15';
+	$post = param_post();
+	
+	foreach ($post['accounts'] as $account) {
+		$user = $account['user'];
+		$category = $account['category'];
+		$amount = $account['amount'];
+
+		// when the amount is set to 0, delete the row instead of flooding the database with 0-entrys
+		if ($amount == 0) { $deleteSql .= " OR (date = '$date' AND user = $user AND category = $category)"; }
+		else { $insertSql .= "($floor, '$date', $user, $category, $amount), "; }
+	}
+
+	$insertSql = substr($insertSql, 0, -2); // remove last comma
+
+	transaction_start();
+	if ($insertSql != "") {
+		query("REPLACE INTO fridge_accounts (floor, date, user, category, amount) VALUES $insertSql");
+	}
+	if ($deleteSql != "") {
+		query("DELETE FROM fridge_accounts WHERE FALSE $deleteSql");
+	}
+	transaction_commit();
+
+	return true;
+}
+
+// returns a accounting table to a specific date
+function accounts_get() {	
 	$floor = $_GET['floor'] ?? $_SESSION['room']['floor'];
 	if (!authorize(1100 + $floor)) { http_error(401, "You need to be the fridge administrator for this action"); }
 
