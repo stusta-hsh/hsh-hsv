@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Getränkerechnungen</title>
+</head>
+
+<script src="../lib/jquery-3.5.1.js"></script>
+
+<body>
+</body>
+
+<script>
+
+// Init
+// ====
+
+var categories;
+var params = new URLSearchParams(window.location.search);
+var ajaxParams = $.extend({}, {
+	date: params.get('date') ?? undefined,
+	floor: params.get('floor') ?? undefined
+});
+
+$.get("../api/fridge/invoices", ajaxParams)
+	.done(function(data) {
+		console.log(data);
+	})
+	.fail(function(data) {
+		alert(data.responseText);
+	});
+
+// Events
+// ======
+
+// Helpers
+// =======
+</script>
+</html>

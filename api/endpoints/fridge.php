@@ -11,7 +11,7 @@ switch ($_GET['q']) {
 	case 'surrAccountingDates': output(surrAccountingDates()); break;
 	case 'categories': output(categories()); break;
 	case 'accounts': output(accounts()); break;
-	case 'invoice': output(invoice()); break;
+	case 'invoices': output(invoices()); break;
 	default: http_error(400, "the requested endpoint \"$_GET[q]\" doesn't exist"); exit;
 }
 
@@ -127,7 +127,7 @@ function accounts_get() {
 	);
 }
 
-function invoice() {
+function invoices() {
 	$date = date('Y-m-d');
 	$sql = "SELECT u.id, u.name, r.house, r.floor, r.room, (account.amount - IFNULL(payments.amount, 0) - IFNULL(donated.amount, 0) + IFNULL(recieved.amount, 0)) AS invoice
 	FROM 
@@ -146,7 +146,25 @@ function invoice() {
 	WHERE (account.amount - IFNULL(payments.amount, 0) - IFNULL(donated.amount, 0) + IFNULL(recieved.amount, 0)) <> 0
 	ORDER BY (CASE WHEN r.house IS NULL THEN 20 ELSE r.house END), r.floor, r.room, u.name";
 
-	return qp_fetch($sql);
+	$invoices = array();
+	$qu = q_fetch($sql);
+	foreach ($qu as $q) {
+		$o = array(
+			'user' => array(
+				'id' => 0+ $q['id'],
+				'name' => $q['name']
+			),
+			'room' => array(
+				'house' => $q['house'],
+				'floor' => $q['floor'],
+				'room' => $q['room']
+			),
+			'invoice' => $q['invoice']
+		);
+		array_push($invoices, $o);
+	}
+
+	return $invoices;
 }
 
 ?>
