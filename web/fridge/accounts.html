@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Getränkeliste</title>
+</head>
+
+<script src="../lib/jquery-3.5.1.js"></script>
+
+<body>
+	<div id='header'>
+		<a id='prev'>*</a>
+		< <span id='curr'></span> >
+		<a id='next'>*</a>
+	</div>
+	<table id="table">
+		<thead>
+			<tr id='headline'>
+				<td/>
+			</tr>
+		</thead>
+		<tbody>
+		</tbody>
+		<tfoot>
+			<tr>
+				<td>
+					<input id='textAdd' type='text' onkeydown="textAdd_keydown(event)" oninput="textAdd_input(event)" autocomplete="off" style='width: 300px'/> <hr/>
+					<select id='opts' size='3' style='width: 300px'/>
+				</td>
+			</tr>
+		</tfoot>
+	</table>
+	<input id='submit' type='submit' value='Speichern' onclick="submit_click(event)"/>
+</body>
+
+<script>
+
+// Init
+// ====
+
+var categories;
+var params = new URLSearchParams(window.location.search);
+var ajaxParams = $.extend({}, {
+	date: params.get('date') ?? undefined,
+	floor: params.get('floor') ?? undefined
+});
+
+$.get("../api/fridge/accounts", ajaxParams)
+	.done(function(data) {
+		// Dates
+		$('#prev').html(data.dates.prev ?? '*').attr('href', '?' + $.param($.extend({date: data.dates.prev}, { floor: ajaxParams.floor ?? undefined })));
+		$('#next').html(data.dates.next ?? '*').attr('href', '?' + $.param($.extend({date: data.dates.next}, { floor: ajaxParams.floor ?? undefined })));
+
+		// Categories
+		data.categories.forEach(category => {
+			$("#headline").append(`<th> ${category.name} (${category.value}€) </th>`);
+		})
+		categories = data.categories;
+
+		// Accounts
+		data.accounts.forEach(a => addUserRow(
+			a.user.id,
+			userNameRoom(a.user.name, a.room.house, a.room.floor, a.room.room),
+			a.account
+		));
+	})
+	.fail(function(data) {
+		alert(data.responseText);
+	});
+
+// Events
+// ======
+
+function textAdd_input(event) {
+	if ($("#textAdd").val() == '') { return; }
+	$.get("../api/user/suggest", { query: $("#textAdd").val(), date: ajaxParams.date })
+		.done(function(data) {
+			$("#opts").empty();
+			for (i = 0; i < data.length; i++) {
+				entry = $("#opts")
+					.append($("<option />")
+						.val(data[i].id)
+						.text(userNameRoom(data[i].name, data[i].house, data[i].floor, data[i].room)));
+			}
+			$("#opts option:first").attr("selected", "selected");
+		})
+		.fail(function(data) {
+			alert(data.responseText);
+		});
+}
+
+function textAdd_keydown(event) {
+	var opts = document.getElementById("opts");
+
+	if (event.keyCode === 40) 		{ opts.selectedIndex++; event.preventDefault(); }	// Down Arrow -> select next element in suggestion list
+	else if (event.keyCode === 38)	{ opts.selectedIndex--; event.preventDefault(); }	// Up Arrow -> select previous suggestion
+	else if (event.keyCode === 13)	{													// Enter Key
+		event.preventDefault();
+
+		// when a already present user is selected, set the input focus on his line
+		for (row of $(".accountRow")) {
+			if (row.getAttribute('user_id') === opts.value) {
+				row.children[1].firstElementChild.focus();
+				$("#textAdd").val(""); $("#opts").html("");
+				return;
+			}
+		}
+		
+		// otherwise, insert a new row
+		addUserRow(
+			opts.selectedOptions[0].value,
+			opts.selectedOptions[0].text,
+			null
+		);
+		$(`#${opts.selectedOptions[0].value}-0`).focus();
+		$("#textAdd").val(""); $("#opts").html("");
+	}
+}
+
+function accountInput_change(event) {
+	event.target.setAttribute("changed", true);
+}
+
+function submit_click(event) {
+	var accounts = $(".accountInput").map(function (){
+		if (this.getAttribute("changed"))
+			return { user: this.getAttribute("user"), category: this.getAttribute("category"), amount: this.value };
+	}).toArray();
+	
+	$.ajax("../api/fridge/accounts", {
+		type: "POST",
+		contentType: "application/json",
+		data: JSON.stringify($.extend(ajaxParams, { accounts: accounts})),
+		success: function() {
+			alert("Sucessfully saved");
+		}
+	});
+}
+
+// Helpers
+// =======
+
+function addUserRow(id, name, value) {
+	var userLine = `<tr class="accountRow" user_id=${id}> <td>${name}</td>`;
+	for (i = 0; i < categories.length; i++) { 
+		userLine += `<td><input class="accountInput" type="number" min="0" step="1" onchange="accountInput_change(event)"
+			changed="false" user="${id}" category="${i}" value="${value == null ? 0 : value[i]}"></td>`;
+	}
+	userLine += `</td>`;
+	$("#table").append(userLine);
+}
+
+function userNameRoom(name, house, floor, room) {
+	output = name;
+	switch (house) {
+		case null: output += " (extern)"; break;
+		case '9': output += ` (${100*floor + 1*room})`; break;
+		default: output += ` (${house}/${100*floor + 1*room})`; break;
+	}
+	return output;
+}
+
+</script>
+</html>

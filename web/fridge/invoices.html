@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Getränkerechnungen</title>
+</head>
+
+<script src="../lib/jquery-3.5.1.js"></script>
+
+<body>
+	<table id="table">
+		<thead>
+			<tr id='headline'>
+				<th>Name</th>
+				<th>Schulden</th>
+			</tr>
+		</thead>
+		<tbody>
+		</tbody>
+	</table>
+</body>
+
+<script>
+
+// Init
+// ====
+
+var categories;
+var params = new URLSearchParams(window.location.search);
+var ajaxParams = $.extend({}, {
+	date: params.get('date') ?? undefined,
+	floor: params.get('floor') ?? undefined
+});
+
+$.get("../api/fridge/invoices", ajaxParams)
+	.done(function(data) {
+		data.forEach(u => addUserRow(
+			u.user.id,
+			userNameRoom(u.user.name, u.room.house, u.room.floor, u.room.room),
+			u.invoice
+		));
+	})
+	.fail(function(data) {
+		alert(data.responseText);
+	});
+
+// Events
+// ======
+
+// Helpers
+// =======
+
+function addUserRow(id, name, invoice) {
+	var userLine = 
+		`<tr class="invoiceRow" user_id=${id}>
+			<td>${name}</td>
+			<td>${invoice}</td>
+		</tr>`;
+	$("#table").append(userLine);
+}
+
+function userNameRoom(name, house, floor, room) {
+	output = name;
+	switch (house) {
+		case null: output += " (extern)"; break;
+		case '9': output += ` (${100*floor + 1*room})`; break;
+		default: output += ` (${house}/${100*floor + 1*room})`; break;
+	}
+	return output;
+}
+</script>
+</html>

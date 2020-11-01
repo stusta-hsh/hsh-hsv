@@ -10,7 +10,8 @@ switch ($_GET['q']) {
 	case 'register': output(register()); break;
 	case 'verify': output(verify()); break;
 	case 'reset_password': output(reset_password()); break;
-	case 'merge': outpur(merge()); break;
+	case 'merge': output(merge()); break;
+	case 'suggest': output(suggest()); break;
 	default: break;
 }
 
@@ -37,10 +38,13 @@ function login() {
 		session_set_cookie_params(0, '/', '.stusta.de', true, true);
 		session_start();
 		
+		$date = date('Y-m-d');
 		$user = qp_firstRow("SELECT id, name, first_name, last_name, email FROM users WHERE email = ?", "s", $email);
+		$room = qp_firstRow("SELECT house, floor, room, date, end FROM rooms r WHERE r.user = ? AND '$date' BETWEEN r.date AND (CASE WHEN r.end IS NULL THEN '$date' ELSE r.end END)", "i", $user);
+		
 		$_SESSION['id'] = $user['id'];
 		$_SESSION['user'] = $user;
-		$_SESSION['room'] = qp_firstRow("SELECT house, floor, room, date, end FROM rooms r WHERE r.user = ? AND '$date' BETWEEN r.date AND (CASE WHEN r.end IS NULL THEN '$date' ELSE r.end END)", "s", $user);
+		$_SESSION['room'] = $room;
 		
 		return true;
 	}
@@ -84,7 +88,7 @@ function register() {
 	// Send verification email to user
 	query("INSERT INTO user_verification (user, code) VALUES ($insertId, '$code')");
 	$subject = "Your registration at HSH";
-	$message = "Hello $name,\r\nto complete your registration at the HSH page, click this link: <a>hsh.stusta.de/api/user/?q=verify&code=$code</a>";
+	$message = "Hello $name,\r\nto complete your registration at the HSH page, click this link: <a>hsh.stusta.de/api/user/verify?user=$insertId&code=$code</a>";
 	$headers = "from: noreply@stusta.de";
 	/*if(!mail($email, $subject, $message, $headers)) {
 		transaction_rollback();
@@ -97,8 +101,8 @@ function register() {
 }
 
 function verify() {
-	$user = require_param($_POST['user']);
-	$code = require_param($_POST['code']);
+	$user = require_param($_GET['user']);
+	$code = require_param($_GET['code']);
 
 	transaction_start();
 	$servercode = qp_firstField("SELECT code FROM user_verification WHERE user = ?", "i", $user);
@@ -106,7 +110,7 @@ function verify() {
 		dm_prepared("UPDATE users SET verified = 1 WHERE id = ?", "i", $user);
 		dm_prepared("DELETE FROM user_verification WHERE user = ?", "i", $user);
 		transaction_commit();
-		return true;
+		return "You have successfully verified your HSH account.";
 	}
 	else {
 		transaction_rollback();
@@ -160,5 +164,19 @@ function merge_property(&$o1, &$o2, $property) {
 	}
 
 	return false;
+}
+
+function suggest() {
+	$query = require_param($_GET['query']);
+	$date = $_GET['date'] ?? date('Y-m-d');
+
+	return q_fetch("SELECT u.id, u.name, r.house, r.floor, r.room
+	FROM users u LEFT JOIN rooms r ON (r.user = u.id AND '$date' BETWEEN r.date AND (CASE WHEN r.end IS NULL THEN '" . date('Y-m-d') . "' ELSE r.end END))
+	WHERE
+		CONCAT (u.first_name, ' ', u.last_name, ' ', u.name, ' ',
+			(CASE WHEN r.house IS NULL THEN '' ELSE CONCAT(r.house, '/', LPAD(r.floor, 2, 0), LPAD(r.room, 2, 0)) END))
+		LIKE '%$query%'
+	ORDER BY u.name
+	LIMIT 10");
 }
 ?>
