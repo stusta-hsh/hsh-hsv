@@ -37,7 +37,8 @@ function http_error($code, $msg) {
 // Authorization functions
 // -----------------------
 
-$roletree = json_decode(file_get_contents('roles.json'));
+// we need to use the parent directory here, because this line gets invoked from one directory below (endpoints)
+$roletree = json_decode(file_get_contents('../roles.json'), TRUE);
 
 function authenticate() {
 	session_name('hshsession');
@@ -66,7 +67,8 @@ function roles($roles) {
 	$newroles = array();
 	foreach ($roles as $role) {
 		$newroles[] = $role;
-		$newroles = array_merge($newroles, roles($roletree->{$role}->{'is-a'}));
+		if (!array_key_exists('is-a', $roletree[$role])) { continue; }
+		$newroles = array_merge($newroles, roles($roletree[$role]['is-a']));
 	}
 	return array_unique($newroles, SORT_NUMERIC);
 }
