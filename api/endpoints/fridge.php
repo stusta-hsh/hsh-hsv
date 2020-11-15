@@ -1,9 +1,6 @@
 <?php 
 
-include('../api.php');
-
-session_name('hshsession');
-session_start();
+require('../api.php');
 
 // Verwertung der Eingabe
 switch ($_GET['q']) {
@@ -83,7 +80,8 @@ function accounts_post() {
 }
 
 // returns a accounting table to a specific date
-function accounts_get() {	
+function accounts_get() {
+	authenticate();
 	$floor = $_GET['floor'] ?? $_SESSION['room']['floor'];
 	if (!authorize(1100 + $floor)) { http_error(401, "You need to be the fridge administrator for this action"); }
 

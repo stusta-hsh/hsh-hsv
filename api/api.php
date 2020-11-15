@@ -37,13 +37,21 @@ function http_error($code, $msg) {
 // Authorization functions
 // -----------------------
 
-// we need to use the parent directory here, because this line gets invoked from one directory below (endpoints)
+// we need to use the parent directory here, because this line gets invoked from the endpoints one directory below
 $roletree = json_decode(file_get_contents('../roles.json'), TRUE);
 
 function authenticate() {
+	// first check, if we are already in a authenticated session
+	if (isset($_SESSION['id'])) {
+		return $_SESSION['id'];
+	}
+
+	// if we aren't, start the session
 	session_name('hshsession');
 	session_start();
-	if ($_SESSION['id']) {
+
+	// if there still is no ID associated with the session, the user hasn't logged in
+	if (array_key_exists('id', $_SESSION)) {
 		return $_SESSION['id'];
 	}
 	else {

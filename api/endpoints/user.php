@@ -1,6 +1,6 @@
 <?php
 
-include('../api.php');
+require('../api.php');
 
 // Verwertung der Eingabe
 switch ($_GET['q']) {
@@ -32,7 +32,8 @@ function login() {
 	// Query the hashed password of the user
 	$hash = qp_firstField("SELECT password FROM users WHERE email = ?", "s", $email);
 
-	if(password_verify($password, $hash)) {					// Hash the recieved password and compare with the saved hash
+	// Hash the recieved password and compare with the saved hash
+	if(password_verify($password, $hash)) {
 		// ** User authenticated **
 		session_name('hshsession');
 		session_set_cookie_params(0, '/', '.stusta.de', true, true);
