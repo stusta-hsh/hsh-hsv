@@ -83,7 +83,7 @@ function accounts_post() {
 function accounts_get() {
 	authenticate();
 	$floor = $_GET['floor'] ?? $_SESSION['room']['floor'];
-	if (!authorize(1100 + $floor)) { http_error(401, "You need to be the fridge administrator for this action"); }
+	if (!authorize(1100 + $floor)) { http_error(403, "You need to be the fridge administrator for this action"); }
 
 	$date = $_GET['date'] ?? currAccountingDate();
 	$categories = categories();

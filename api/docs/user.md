@@ -4,15 +4,15 @@ This endpoint contains functionality to manage users, their rooms, and their rol
 in the self administration.
 
 ## Overview
-*	Me: Returnes information about the currently logged in user.
-*	Login: Creates an authorized session for the user.
-*	Create: Creates a ghost entry in the users table to work with.
-*	Request: Creates a registration request, that an authorized user needs to accept.
-*	Verify: Verifies the Email address of a registration request.
-*	Register: Resolves a registration request by associating it with a ghost account.
-*	Change Password: Changes the password of an authorized user.
-*	Reset Password: Resets the password of an unauthrized user to a random string.
-*	Suggest: Returns a list of users that match a query string.
+*	*Me*: Returnes information about the currently logged in user.
+*	*Login*: Creates an authorized session for the user.
+*	*Create*: Creates a ghost entry in the users table to work with.
+*	*Request*: Creates a registration request, that an authorized user needs to accept.
+*	*Verify*: Verifies the Email address of a registration request.
+*	*Register*: Resolves a registration request by associating it with a ghost account.
+*	*Change Password*: Changes the password of an authorized user.
+*	*Reset Password*: Resets the password of an unauthrized user to a random string.
+*	*Suggest*: Returns a list of users that match a query string.
 
 ## Functions
 
@@ -111,7 +111,7 @@ request with an already `created` ghost account.
 ### Change Password
 With this function a user can change it's password. This can be especially useful, when
 it was `resetted` to a random value.
-*	URI: `/api/user/change_password`
+*	URI: `/api/user/changePassword`
 *	Method: `POST`
 *	Authorisation: A user can only change it's own password
 *	Parameters:
@@ -122,7 +122,7 @@ it was `resetted` to a random value.
 ### Reset Password
 When a user forgets his password, this function resets it to a random value, and
 sends it to the E-Mail address associated with the account.
-*	URI: `/api/user/reset_password`
+*	URI: `/api/user/resetPassword`
 *	Method: `POST`
 *	Authorisation: None
 *	Parameters:
