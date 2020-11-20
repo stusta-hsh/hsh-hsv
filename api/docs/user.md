@@ -1,6 +1,6 @@
 # API-Endpoint /user
 
-This endpoint contains functionality to manage users, their rooms, and their roles
+This endpoint contains functionality to manage users, their rooms, and their roles 
 in the self administration.
 
 ## Overview
