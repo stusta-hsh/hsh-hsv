@@ -9,7 +9,7 @@ switch ($_GET['q']) {
 	case 'categories': output(categories()); break;
 	case 'accounts': output(accounts()); break;
 	case 'invoices': output(invoices()); break;
-	default: http_error(400, "the requested endpoint \"$_GET[q]\" doesn't exist"); exit;
+	default: http_error(400, "the requested function \"$_GET[q]\" doesn't exist"); exit;
 }
 
 // --------------

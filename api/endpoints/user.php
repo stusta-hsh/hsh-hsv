@@ -12,7 +12,7 @@ switch ($_GET['q']) {
 	case 'reset_password': output(reset_password()); break;
 	case 'merge': output(merge()); break;
 	case 'suggest': output(suggest()); break;
-	default: break;
+	default: http_error(400, "the requested function \"$_GET[q]\" doesn't exist"); break;
 }
 
 // --------------
