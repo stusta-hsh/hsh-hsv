@@ -4,7 +4,7 @@ This endpoint contains functionality to manage users, their rooms, and their rol
 in the self administration.
 
 ## Overview
-*	*Me*: Returnes information about the currently logged in user.
+*	*Me*: Returns information about the currently logged in user.
 *	*Login*: Creates an authorized session for the user.
 *	*Create*: Creates a ghost entry in the users table to work with.
 *	*Request*: Creates a registration request, that an authorized user needs to accept.
