@@ -2,7 +2,7 @@
 
 require('../api.php');
 
-// Verwertung der Eingabe
+// Determine API function 
 switch ($_GET['q']) {
 	case 'all': output(all()); break;
 	case 'ep': output(endpoint()); break;
@@ -12,39 +12,47 @@ switch ($_GET['q']) {
 }
 
 // --------------
-// API-Funktionen
+// API functions
 // --------------
 
 function all() {
-	$files = array_filter(scandir('../docs'), function($v) { return substr($v, -3) == '.md'; });
+	// Find all markdown files in the docs directory
+	$files = array_filter(scandir('../docs'), function($v) { return strcmp(substr($v, -3), '.md') == 0; });
+
+	// In every file, the first lines contain a short description of the endpoint
 	return array_map(function($f) {
 		$file = file("../docs/$f");
 		$desc = "";
-		for($i = 2; substr($file[$i], 0, 2) != '##'; $i++) {
-			$desc .= substr($file[$i], 0, -1);
+
+		//Start at the second line
+		for($i = 1; substr($file[$i], 0, 2) != '##'; $i++) {
+			$desc .= trim($file[$i]) . " ";
 		}
 		return array(
 			'name' => substr($f, 0, -3),
-			'desc' => $desc
+			'desc' => trim($desc)
 		);
 	}, $files);
 }
 
 function endpoint() {
+	// If called from the shortcut, the requested endpoint stands in the original URL
 	if ($_GET['u']) {
 		$file = docfile(explode('/', $_GET['u'])[1]);
-	} else {
+	} else { // If called directly, the requested endpoint is a GET parameter
 		$file = docfile(require_param($_GET['endpoint']));
 	}
 
-	// Find overview section
 	$i = 0;
 	$functions = array();
+
+	// Find the overview section
 	while ($file[$i] && substr($file[$i], 0, 11) != '## Overview') { $i++; }
 	$i++;
 
-	while (substr($file[$i], 0, 1) == '*') {
-		$colon = strpos($file[$i], ':');
+	// Every line of the overview section contains an API function and a short description
+	while (strcmp($file[$i][0], '*') == 0) {
+		$colon = strpos($file[$i], ':'); // A colon seperates the name and description
 		array_push($functions, array(
 			'name' => substr($file[$i], 3, $colon - 4),
 			'desc' => substr($file[$i], $colon + 2, -1)
@@ -56,9 +64,13 @@ function endpoint() {
 }
 
 function fun() {
+	// If called from the the shortcut, the requested endpoint and function stand in the original URL
 	if ($_GET['u']) {
 		$u = explode('/', $_GET['u']);
 		$file = docfile($u[1]);
+
+		// The shortcut URL is the same as the URL of the API function,
+		// so you have to find the section about it first
 		$fun = findFun($file);
 	} else {
 		$file = docfile(require_param($_GET['endpoint']));
@@ -71,12 +83,12 @@ function fun() {
 
 	// Find the section about the required function
 	$i = 0; $l = strlen($fun) + 4;
-	while ($file[$i] && substr($file[$i], 0, $l) != "### $fun") { $i++; }
+	while ($file[$i] && strcmp(substr($file[$i], 0, $l), "### $fun") != 0) { $i++; }
 	if (!$file[$i]) { http_error(400, "The function $fun doesn't exist in this endpoint."); }
 	$i++;
 
 	$desc = "";
-	while (substr($file[$i], 0, 1) != '*') {
+	while (strcmp(substr($file[$i], 0, 1), '*') != 0) {
 		$desc .= substr($file[$i], 0, -1) . " ";
 		$i++;
 	}
