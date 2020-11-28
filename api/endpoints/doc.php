@@ -4,9 +4,10 @@ require('../api.php');
 
 // Verwertung der Eingabe
 switch ($_GET['q']) {
-	case 'endpoints': output(endpoints()); break;
-	case 'functions': output(functions()); break;
-	case 'doc': output(doc()); break;
+	case 'all': output(all()); break;
+	case 'ep': output(endpoint()); break;
+	case 'fun': output(fun()); break;
+	case 'd': output(shortcut()); break;
 	default: http_error(400, "the requested function \"$_GET[q]\" doesn't exist"); break;
 }
 
@@ -14,7 +15,7 @@ switch ($_GET['q']) {
 // API-Funktionen
 // --------------
 
-function endpoints() {
+function all() {
 	$files = array_filter(scandir('../docs'), function($v) { return substr($v, -3) == '.md'; });
 	return array_map(function($f) {
 		$file = file("../docs/$f");
@@ -29,8 +30,12 @@ function endpoints() {
 	}, $files);
 }
 
-function functions() {
-	$file = docfile(require_param($_GET['endpoint']));
+function endpoint() {
+	if ($_GET['u']) {
+		$file = docfile(explode('/', $_GET['u'])[1]);
+	} else {
+		$file = docfile(require_param($_GET['endpoint']));
+	}
 
 	// Find overview section
 	$i = 0;
@@ -50,9 +55,16 @@ function functions() {
 	return $functions;
 }
 
-function doc() {
-	$file = docfile(require_param($_GET['endpoint']));
-	$fun = require_param($_GET['function']);
+function fun() {
+	if ($_GET['u']) {
+		$u = explode('/', $_GET['u']);
+		$file = docfile($u[1]);
+		$fun = findFun($file);
+	} else {
+		$file = docfile(require_param($_GET['endpoint']));
+		$fun = require_param($_GET['function']);
+	}
+
 	$output = array(
 		'name' => $fun
 	);
@@ -86,6 +98,20 @@ function doc() {
 	return $output;
 }
 
+function shortcut() {
+	$shortcut = explode('/', $_GET['u']);
+	switch (count($shortcut)) {
+		case 1:
+			return all();
+		case 2: 
+			if (strlen($shortcut[1]) == 0) { return all(); }
+			return endpoint();
+		default:
+			if (strlen($shortcut[2]) == 0) { return endpoint(); }
+			return fun();
+	}
+}
+
 // --------------
 // Helpers
 // --------------
@@ -111,5 +137,13 @@ function multilineAttribute($file, &$i, $name) {
 		));
 	}
 	return $params;
+}
+
+function findFun($file) {
+	$i = 0;
+	while ($file[$i] && substr($file[$i], 0, 12+strlen($_GET['u'])) != "*\tURI: `/api" . $_GET['u']) { $i++; }
+	if (!$file[$i]) { http_error(400, "The function $_GET[u] doesn't exist in this endpoint."); }
+	while (substr($file[$i], 0, 3) != '###') { $i--; }
+	return substr($file[$i], 4, -1);
 }
 ?>
