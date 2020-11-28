@@ -33,14 +33,14 @@ contains a session ID, that PHP uses to associate respective data with the user 
 requests, which then stands in the global variable `$_SESSION`. This method fills the
 global variable with the user ID, information about the user and the user's room.
 *	URI: `/api/user/login`
-*   Method: `POST`
-*   Authorisation: None
-*   Parameters:
-	*   `email`: the user's E-Mail
-	*   `password`: the user's password (in plaintext)
-*   Returns:
-	*   `204`: if the login was successfull
-	*   `401`: if the login was not successfull.
+*	Method: `POST`
+*	Authorisation: None
+*	Parameters:
+	*	`email`: the user's E-Mail
+	*	`password`: the user's password (in plaintext)
+*	Returns:
+	*	`204`: if the login was successfull
+	*	`401`: if the login was not successfull.
 		This can happen when the provided email is unknown or the password is incorrect.
 		For data protection reasons these situations are handled in the same way.
 
