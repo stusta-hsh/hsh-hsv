@@ -9,7 +9,7 @@ switch ($_GET['q']) {
 	case 'categories': output(categories()); break;
 	case 'accounts': output(accounts()); break;
 	case 'invoices': output(invoices()); break;
-	default: http_error(400, "the requested endpoint \"$_GET[q]\" doesn't exist"); exit;
+	default: http_error(400, "the requested function \"$_GET[q]\" doesn't exist"); exit;
 }
 
 // --------------
@@ -83,7 +83,7 @@ function accounts_post() {
 function accounts_get() {
 	authenticate();
 	$floor = $_GET['floor'] ?? $_SESSION['room']['floor'];
-	if (!authorize(1100 + $floor)) { http_error(401, "You need to be the fridge administrator for this action"); }
+	if (!authorize(1100 + $floor)) { http_error(403, "You need to be the fridge administrator for this action"); }
 
 	$date = $_GET['date'] ?? currAccountingDate();
 	$categories = categories();

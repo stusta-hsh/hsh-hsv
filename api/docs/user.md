@@ -1,56 +1,145 @@
 # API-Endpoint /user
 
-This endpoint contains functionality to manage users, their rooms, and their roles
+This endpoint contains functionality to manage users, their rooms, and their roles 
 in the self administration.
 
-## Login
+## Overview
+*	*Me*: Returns information about the currently logged in user.
+*	*Login*: Creates an authorized session for the user.
+*	*Create*: Creates a ghost entry in the users table to work with.
+*	*Request*: Creates a registration request, that an authorized user needs to accept.
+*	*Verify*: Verifies the Email address of a registration request.
+*	*Register*: Resolves a registration request by associating it with a ghost account.
+*	*Change Password*: Changes the password of an authorized user.
+*	*Reset Password*: Resets the password of an unauthrized user to a random string.
+*	*Suggest*: Returns a list of users that match a query string.
 
-*   URL: `https://hsh.stusta.de/api/user/?q=login`
-*   Method: `POST`
-*   Authentication: None
-*   Parameters:
-	*   `email`: the user's email
-	*   `password`: the user's password (in plaintext)
-*   Returns:
-	*   `200`: if the login was successfull
-	*   `401`: if the login was not successfull.
+## Functions
+
+### Me
+This function authenticates the user and returns all information about him stored in
+the users table of the database.
+*	URI: `/api/user/me`
+*	Method: `GET`
+*	Authorisation: A user can only get information about himself.
+*	Parameters: None
+*	Returns:
+	*	`200`: with the mentioned data
+	*	`401`: if no user is logged in
+
+### Login
+This function establishes a PHP session by sending a cookie with the response. The cookie
+contains a session ID, that PHP uses to associate respective data with the user in later
+requests, which then stands in the global variable `$_SESSION`. This method fills the
+global variable with the user ID, information about the user and the user's room.
+*	URI: `/api/user/login`
+*	Method: `POST`
+*	Authorisation: None
+*	Parameters:
+	*	`email`: the user's E-Mail
+	*	`password`: the user's password (in plaintext)
+*	Returns:
+	*	`204`: if the login was successfull
+	*	`401`: if the login was not successfull.
 		This can happen when the provided email is unknown or the password is incorrect.
 		For data protection reasons these situations are handled in the same way.
 
-## Create
-Creates an entry in the users table to work with. The user can't log in yet.
-
-*	URL: `https://hsh.stusta.de/api/user/?q=create`
+### Create
+This function is used for two cases: (1) in response to a registration request, a authorized
+person creates the account with the provided or modified data and registers it afterwards.
+(2) in order to put someone on a list (fridge accounts or floor resposibles), who has no
+account and has not (yet) requested one. It creates an entry in the users table, but
+without a password, so nobody can log in there yet ("ghost account").
+*	URI: `/api/user/create`
 *	Method: `POST`
-*	Authentication: None
+*	Authorisation: Roles `2`, `3`, `4`, `11xx`
 *	Parameters:
 	*	`name`: A name for the user
-	*	`firstName`: The users first name (optional)
-	*	`lastName`: The users last name (optional)
-	*	`email`: Email address of the user (optional)
+	*	`firstName`: The user's first name (optional)
+	*	`lastName`: The user's last name (optional)
+	*	`email`: E-Mail address of the user (optional)
+	*	`room`: The user's room (optional)
+	*	`moved_in`: The date, when the user moved in the mentioned room (required with `room`) 
 *	Returns:
-	*	`200`: the created user entry
+	*	`201`: with the created user entry
+	*	`401`: if no user is logged in
 
-
-## Register
-
-*	URL: `https://hsh.stusta.de/api/user/?q=register`
+### Request
+Used from inhabitants to gain an account. After `verifying` the E-Mail, the request will be
+queued and reviewed by authorized users. If the request is reasonable, they can `create`
+the account, or associate it to an already existing ghost account via `register`.
+*	URI: `/api/user/request`
 *	Method: `POST`
-*	Authentication: None
+*	Authorisation: None
 *	Parameters:
-	*	`user`: The user ID
-	*	`password`: The password to be set
+	*	`name`: A name for the user
+	*	`email`: E-Mail address of the user
+	*	`password`: The password the user will have, once his account is registered
+	*	`firstName`: The user's first name (optional)
+	*	`lastName`: The user's last name (optional)
+	*	`room`: The user's room (optional)
+	*	`moved_in`: The date, when the user moved in the mentioned room (required with `room`) 
 *	Returns:
-	*	`200`: the created user entry
-	*	`401`: the user is already registered
+	*	`201`: with the created registration request
 
-## Reset Password
-
-*	URL: `https://hsh.stusta.de/api/user/?q=reset_password`
+### Verify
+After requesting a registration, one must verify his E-Mail address, that he provided. This is
+managed with a verification E-Mail containing a personalized link, that leads to this function.
+*	URI: `/api/user/verify`
 *	Method: `POST`
-*	Authentication: The user can only reset it's own password
+*	Authorisation: None
 *	Parameters:
-	*	`password`: The password to be set
+	*	`request`: The request ID generated by `request`
+	*	`code`: The hexadecimal representation of a random number, also generated by `request`
 *	Returns:
-	*	`200`: the created user entry
-	*	`401`: no user is logged in
+	*	`204`: if the verification was successfull
+	*	`401`: if the request ID dosn't exist or the code dosn't match
+
+### Register
+Used by floor representatives or other authorized persons to associate a `verified` registration
+request with an already `created` ghost account.
+*	URI: `/api/user/register`
+*	Method: `POST`
+*	Authorisation: Roles `2`, `3`, `4`, `11xx`
+*	Parameters:
+	*	`request`: The request ID
+	*	`user`: The ID of a ghost account, that the requester should obtain
+*	Returns:
+	*	`204`: if the registration was successful
+	*	`409`: if the request was already accepted or the specified account is not a ghost
+
+### Change Password
+With this function a user can change it's password. This can be especially useful, when
+it was `resetted` to a random value.
+*	URI: `/api/user/changePassword`
+*	Method: `POST`
+*	Authorisation: A user can only change it's own password
+*	Parameters:
+	*	`password`: The new password the user wants to set
+*	Returns:
+	*	`204`: if the change was successful
+
+### Reset Password
+When a user forgets his password, this function resets it to a random value, and
+sends it to the E-Mail address associated with the account.
+*	URI: `/api/user/resetPassword`
+*	Method: `POST`
+*	Authorisation: None
+*	Parameters:
+	*	`email`: The E-Mail address associated with the account to be resetted
+*	Returns:
+	*	`200`: Always. For data protection, the user can't distinguish, whether
+		the provided E-Mail matched any of the registered ones.
+
+### Suggest
+With this function, one can search for other users and obtain information about them.
+It retuns up to 10 users, their names and rooms, which match the query string. One can
+query for names as well as room numbers.
+*	URI: `/api/user/suggest`
+*	Method: `GET`
+*	Authorisation: Roles `2`, `11xx`
+*	Parameters:
+	*	`query`: The new password the user wants to set
+	*	`date`: the date concerning the association from users to their room (optional)
+*	Returns:
+	*	`200`: with the list of matching users
