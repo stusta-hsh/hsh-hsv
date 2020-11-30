@@ -52,17 +52,14 @@ account and has not (yet) requested one. It creates an entry in the users table,
 without a password, so nobody can log in there yet ("ghost account").
 *	URI: `/api/user/create`
 *	Method: `POST`
-*	Authorisation: Roles `2`, `3`, `4`, `11xx`
+*	Authorisation: Roles `2`, `3`, `4`, `18`
 *	Parameters:
 	*	`name`: A name for the user
 	*	`firstName`: The user's first name (optional)
 	*	`lastName`: The user's last name (optional)
 	*	`email`: E-Mail address of the user (optional)
-	*	`room`: The user's room (optional)
-	*	`moved_in`: The date, when the user moved in the mentioned room (required with `room`) 
 *	Returns:
 	*	`201`: with the created user entry
-	*	`401`: if no user is logged in
 
 ### Request
 Used from inhabitants to gain an account. After `verifying` the E-Mail, the request will be
