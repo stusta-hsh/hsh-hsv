@@ -76,12 +76,22 @@ function request() {
 	$password = require_param($post['password']);
 	$firstName = $post['firstName'] ?: "";
 	$lastName = $post['lastName'] ?: "";
-	if ($post['room']) {
+
+	if ($post['room']) { // room is optimal
 		$house = $post['room']['house'];
-		$floor = $post['room']['room'];
+		$floor = $post['room']['floor'];
 		$room = $post['room']['room'];
-		$moved_in = $post['room']['moved_in'];
+		$movedIn = $post['room']['movedIn'];
+
+		$insertId = dm_prepared("INSERT INTO user_requests (name, first_name, last_name, email, password, house, floor, room, moved_in) VALUES (?,?,?,?,?,?,?,?,?)",
+			"sssssiiis", $name, $firstName, $lastName, $email, $password, $house, $floor, $room, $movedIn);
+	} else {
+		$insertId = dm_prepared("INSERT INTO user_requests (name, first_name, last_name, email, password) VALUES (?,?,?,?,?)",
+			"sssss", $name, $firstName, $lastName, $email, $password);
 	}
+	
+	http_response_code(201);
+	return q_firstRow("SELECT * FROM user_requests WHERE id = $insertId");
 }
 
 function register() {
