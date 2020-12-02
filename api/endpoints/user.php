@@ -55,12 +55,16 @@ function login() {
 }
 
 function create() {
-	$name = require_param($_POST['name']);					// The request must contain at least a name for the new user
-	$firstName = $_POST['firstName'] ?: "";
-	$lastName = $_POST['lastName'] ?: "";
-	$email = $_POST['email'] ?: "";
+	if (!authorize(2, 3, 4, 18)) { http_error(403, "You are not authorized to create users"); }
+
+	$post = param_post();
+	$name = require_param($post['name']);	// The request must contain at least a name for the new user
+	$firstName = $post['firstName'] ?: "";
+	$lastName = $post['lastName'] ?: "";
+	$email = $post['email'] ?: "";
 	
 	$insertId = dm_prepared("INSERT INTO users (name, first_name, last_name, email) VALUES (?,?,?,?)", "ssss", $name, $firstName, $lastName, $email);
+	http_response_code(201);
 	return q_firstRow("SELECT * FROM users WHERE id = $insertId");
 }
 

@@ -59,13 +59,17 @@ function authenticate() {
 	}
 }
 
-function authorize($scope) {
+function authorize(...$scopes) {
 	$user = authenticate();												// identify the user
 	$date = date('Y-m-d');
 	$roles = roles(q_firstColumn(										// identify all roles of the user
 		"SELECT u.role FROM user_roles u WHERE user = $user AND '$date' BETWEEN u.start AND u.end"));
 
-	foreach ($roles as $role) { if ($role == $scope) { return true; } }	// Does one of the roles match with the required one?
+	foreach ($roles as $role) {
+		foreach ($scopes as $scope) {
+			if ($role == $scope) { return true; }						// Does one of the roles match with the required one?
+		}
+	}
 	return false;														// If no role does, the user isn't authorized
 }
 
