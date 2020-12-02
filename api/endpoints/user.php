@@ -77,6 +77,12 @@ function request() {
 	$firstName = $post['firstName'] ?: "";
 	$lastName = $post['lastName'] ?: "";
 
+	if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+		http_error(400, "Email not in a valid format");
+	}
+	
+	$hash = password_hash($password, PASSWORD_DEFAULT);
+
 	if ($post['room']) { // room is optimal
 		$house = $post['room']['house'];
 		$floor = $post['room']['floor'];
@@ -84,10 +90,10 @@ function request() {
 		$movedIn = $post['room']['movedIn'];
 
 		$insertId = dm_prepared("INSERT INTO user_requests (name, first_name, last_name, email, password, house, floor, room, moved_in) VALUES (?,?,?,?,?,?,?,?,?)",
-			"sssssiiis", $name, $firstName, $lastName, $email, $password, $house, $floor, $room, $movedIn);
+			"sssssiiis", $name, $firstName, $lastName, $email, $hash, $house, $floor, $room, $movedIn);
 	} else {
 		$insertId = dm_prepared("INSERT INTO user_requests (name, first_name, last_name, email, password) VALUES (?,?,?,?,?)",
-			"sssss", $name, $firstName, $lastName, $email, $password);
+			"sssss", $name, $firstName, $lastName, $email, $hash);
 	}
 	
 	http_response_code(201);
