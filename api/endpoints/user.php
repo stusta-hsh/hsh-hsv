@@ -70,7 +70,18 @@ function create() {
 }
 
 function request() {
-
+	$post = param_post();
+	$name = require_param($post['name']);
+	$email = require_param($post['email']);
+	$password = require_param($post['password']);
+	$firstName = $post['firstName'] ?: "";
+	$lastName = $post['lastName'] ?: "";
+	if ($post['room']) {
+		$house = $post['room']['house'];
+		$floor = $post['room']['room'];
+		$room = $post['room']['room'];
+		$moved_in = $post['room']['moved_in'];
+	}
 }
 
 function register() {
