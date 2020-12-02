@@ -2,11 +2,12 @@
 
 require('../api.php');
 
-// Verwertung der Eingabe
+// Determine API function 
 switch ($_GET['q']) {
 	case 'me': output(me()); break;
 	case 'login': output(login()); break;
 	case 'create': output(create()); break;
+	case 'request': output(request()); break;
 	case 'register': output(register()); break;
 	case 'verify': output(verify()); break;
 	case 'reset_password': output(reset_password()); break;
@@ -66,6 +67,10 @@ function create() {
 	$insertId = dm_prepared("INSERT INTO users (name, first_name, last_name, email) VALUES (?,?,?,?)", "ssss", $name, $firstName, $lastName, $email);
 	http_response_code(201);
 	return q_firstRow("SELECT * FROM users WHERE id = $insertId");
+}
+
+function request() {
+
 }
 
 function register() {
