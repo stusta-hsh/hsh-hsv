@@ -71,8 +71,8 @@ function create() {
 
 function request() {
 	$post = param_post();
-	$name = require_param($post['name']);
-	$email = require_param($post['email']);
+	$name = require_param($post['name']);			// The request must contain a name
+	$email = require_param($post['email']);			// and the user credentials
 	$password = require_param($post['password']);
 	$firstName = $post['firstName'] ?: "";
 	$lastName = $post['lastName'] ?: "";
@@ -83,7 +83,8 @@ function request() {
 	
 	$hash = password_hash($password, PASSWORD_DEFAULT);
 
-	if ($post['room']) { // room is optimal
+	// Room is optional
+	if ($post['room']) {
 		$house = $post['room']['house'];
 		$floor = $post['room']['floor'];
 		$room = $post['room']['room'];
@@ -92,6 +93,7 @@ function request() {
 		$insertId = dm_prepared("INSERT INTO user_requests (name, first_name, last_name, email, password, house, floor, room, moved_in) VALUES (?,?,?,?,?,?,?,?,?)",
 			"sssssiiis", $name, $firstName, $lastName, $email, $hash, $house, $floor, $room, $movedIn);
 	} else {
+		// If no room is given in the request, don't set it
 		$insertId = dm_prepared("INSERT INTO user_requests (name, first_name, last_name, email, password) VALUES (?,?,?,?,?)",
 			"sssss", $name, $firstName, $lastName, $email, $hash);
 	}
