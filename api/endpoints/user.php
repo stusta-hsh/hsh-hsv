@@ -71,26 +71,28 @@ function create() {
 
 function request() {
 	$post = param_post();
-	$name = require_param($post['name']);			// The request must contain a name
-	$email = require_param($post['email']);			// and the user credentials
+	$name = require_param($post['name']);					// The request must contain a name
+	$email = require_param($post['email']);					// and the user credentials
 	$password = require_param($post['password']);
 	$firstName = $post['firstName'] ?: "";
 	$lastName = $post['lastName'] ?: "";
 
-	if ($post['room']) {
-		$house = $post['room']['house'];
-		$floor = $post['room']['floor'];
-		$room = $post['room']['room'];
-		$movedIn = $post['room']['movedIn'];
+	$house = $floor = $room = $movedIn = null;				// Avoid PHP Notices
+	if (array_key_exists('room', $post)) {					// Optional room object. If included, it must contain all variables
+		$house = require_param($post['room']['house']);
+		$floor = require_param($post['room']['floor']);
+		$room = require_param($post['room']['room']);
+		$movedIn = require_param($post['room']['movedIn']);
 	}
 
-	if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+	if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {		// Check for valid email format
 		http_error(400, "Email not in a valid format");
 	}
 	
-	$hash = password_hash($password, PASSWORD_DEFAULT);
-	$verificationCode = bin2hex(random_bytes(10));
+	$hash = password_hash($password, PASSWORD_DEFAULT);		// Create the password hash, that will be stored in the database
+	$verificationCode = bin2hex(random_bytes(10));			// Create the code, the user must provide to verify his request
 
+	// Insert to database
 	$insertId = dm_prepared(
 		"INSERT INTO user_requests (name, first_name, last_name, email, password, verification, house, floor, room, moved_in) VALUES (?,?,?,?,?,?,?,?,?,?)",
 		"ssssssiiis", $name, $firstName, $lastName, $email, $hash, $verificationCode, $house, $floor, $room, $movedIn);
