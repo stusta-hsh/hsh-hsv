@@ -2,11 +2,12 @@
 
 require('../api.php');
 
-// Verwertung der Eingabe
+// Determine API function 
 switch ($_GET['q']) {
 	case 'me': output(me()); break;
 	case 'login': output(login()); break;
 	case 'create': output(create()); break;
+	case 'request': output(request()); break;
 	case 'register': output(register()); break;
 	case 'verify': output(verify()); break;
 	case 'reset_password': output(reset_password()); break;
@@ -66,6 +67,39 @@ function create() {
 	$insertId = dm_prepared("INSERT INTO users (name, first_name, last_name, email) VALUES (?,?,?,?)", "ssss", $name, $firstName, $lastName, $email);
 	http_response_code(201);
 	return q_firstRow("SELECT * FROM users WHERE id = $insertId");
+}
+
+function request() {
+	$post = param_post();
+	$name = require_param($post['name']);			// The request must contain a name
+	$email = require_param($post['email']);			// and the user credentials
+	$password = require_param($post['password']);
+	$firstName = $post['firstName'] ?: "";
+	$lastName = $post['lastName'] ?: "";
+
+	if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+		http_error(400, "Email not in a valid format");
+	}
+	
+	$hash = password_hash($password, PASSWORD_DEFAULT);
+
+	// Room is optional
+	if ($post['room']) {
+		$house = $post['room']['house'];
+		$floor = $post['room']['floor'];
+		$room = $post['room']['room'];
+		$movedIn = $post['room']['movedIn'];
+
+		$insertId = dm_prepared("INSERT INTO user_requests (name, first_name, last_name, email, password, house, floor, room, moved_in) VALUES (?,?,?,?,?,?,?,?,?)",
+			"sssssiiis", $name, $firstName, $lastName, $email, $hash, $house, $floor, $room, $movedIn);
+	} else {
+		// If no room is given in the request, don't set it
+		$insertId = dm_prepared("INSERT INTO user_requests (name, first_name, last_name, email, password) VALUES (?,?,?,?,?)",
+			"sssss", $name, $firstName, $lastName, $email, $hash);
+	}
+	
+	http_response_code(201);
+	return q_firstRow("SELECT * FROM user_requests WHERE id = $insertId");
 }
 
 function register() {
