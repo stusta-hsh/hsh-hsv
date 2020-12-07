@@ -77,29 +77,57 @@ function request() {
 	$firstName = $post['firstName'] ?: "";
 	$lastName = $post['lastName'] ?: "";
 
-	if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-		http_error(400, "Email not in a valid format");
-	}
-	
-	$hash = password_hash($password, PASSWORD_DEFAULT);
-
-	// Room is optional
 	if ($post['room']) {
 		$house = $post['room']['house'];
 		$floor = $post['room']['floor'];
 		$room = $post['room']['room'];
 		$movedIn = $post['room']['movedIn'];
+	}
 
-		$insertId = dm_prepared("INSERT INTO user_requests (name, first_name, last_name, email, password, house, floor, room, moved_in) VALUES (?,?,?,?,?,?,?,?,?)",
-			"sssssiiis", $name, $firstName, $lastName, $email, $hash, $house, $floor, $room, $movedIn);
-	} else {
-		// If no room is given in the request, don't set it
-		$insertId = dm_prepared("INSERT INTO user_requests (name, first_name, last_name, email, password) VALUES (?,?,?,?,?)",
-			"sssss", $name, $firstName, $lastName, $email, $hash);
+	if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+		http_error(400, "Email not in a valid format");
 	}
 	
+	$hash = password_hash($password, PASSWORD_DEFAULT);
+	$verificationCode = bin2hex(random_bytes(10));
+
+	$insertId = dm_prepared(
+		"INSERT INTO user_requests (name, first_name, last_name, email, password, verification, house, floor, room, moved_in) VALUES (?,?,?,?,?,?,?,?,?,?)",
+		"ssssssiiis", $name, $firstName, $lastName, $email, $hash, $verificationCode, $house, $floor, $room, $movedIn);
+
+	if (!$insertId) { http_error(400, "Request denied. Probably the email already exists."); }
+
+	// Send verification email to user
+	query("INSERT INTO user_verification (user, code) VALUES ($insertId, '$code')");
+	$subject = "Your registration at HSH";
+	$message = "Hello $name,\r\nto complete your registration at the HSH page, click this link: <a>hsh.stusta.de/api/user/verify?user=$insertId&code=$code</a>";
+	$headers = "from: noreply@stusta.de";
+	/*if(!mail($email, $subject, $message, $headers)) {
+		transaction_rollback();
+		http_error(500, "Registration email could not be sent");
+	}*/
+	
+	// Exclude all columns with sensitive data
 	http_response_code(201);
-	return q_firstRow("SELECT * FROM user_requests WHERE id = $insertId");
+	return q_firstRow("SELECT id, date, name, first_name, last_name, email, house, floor, room, moved_in FROM user_requests WHERE id = $insertId");
+}
+
+function verify() {
+	$user = require_param($_GET['user']);
+	$code = require_param($_GET['code']);
+
+	transaction_start();
+	$servercode = qp_firstField("SELECT code FROM user_verification WHERE user = ?", "i", $user);
+	if ($servercode == $code) {
+		dm_prepared("UPDATE users SET verified = 1 WHERE id = ?", "i", $user);
+		dm_prepared("DELETE FROM user_verification WHERE user = ?", "i", $user);
+		transaction_commit();
+		return "You have successfully verified your HSH account.";
+	}
+	else {
+		transaction_rollback();
+		http_error(400, "Invalid verification link");
+	}
 }
 
 function register() {
@@ -137,24 +165,6 @@ function register() {
 	transaction_commit();
 	return q_firstRow("SELECT * FROM users WHERE id = $insertId");
 	return true;
-}
-
-function verify() {
-	$user = require_param($_GET['user']);
-	$code = require_param($_GET['code']);
-
-	transaction_start();
-	$servercode = qp_firstField("SELECT code FROM user_verification WHERE user = ?", "i", $user);
-	if ($servercode == $code) {
-		dm_prepared("UPDATE users SET verified = 1 WHERE id = ?", "i", $user);
-		dm_prepared("DELETE FROM user_verification WHERE user = ?", "i", $user);
-		transaction_commit();
-		return "You have successfully verified your HSH account.";
-	}
-	else {
-		transaction_rollback();
-		http_error(400, "Invalid verification link");
-	}
 }
 
 function reset_password() {
