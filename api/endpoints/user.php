@@ -59,7 +59,7 @@ function create() {
 	if (!authorize(2, 3, 4, 18)) { http_error(403, "You are not authorized to create users"); }
 
 	$post = param_post();
-	$name = require_param($post['name']);	// The request must contain at least a name for the new user
+	$name = require_param($post['name']);					// The request must contain at least a name for the new user
 	$firstName = $post['firstName'] ?: "";
 	$lastName = $post['lastName'] ?: "";
 	$email = $post['email'] ?: "";
@@ -105,7 +105,6 @@ function request() {
 		transaction_rollback();
 		http_error(500, "Request verification email could not be sent");
 	}
-
 	transaction_commit();
 	
 	// Exclude all columns with sensitive data
@@ -234,6 +233,7 @@ function suggest() {
 // --------------
 
 function verificationMail($email, $name, $id, $code) {
+	global $DEBUG;
 	if ($DEBUG) { return true; }
 
 	$subject = "Your registration request at HSH";
