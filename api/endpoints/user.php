@@ -17,7 +17,7 @@ switch ($_GET['q']) {
 }
 
 // --------------
-// API-Funktionen
+// API functions
 // --------------
 
 function me() {
@@ -93,6 +93,7 @@ function request() {
 	$verificationCode = bin2hex(random_bytes(10));			// Create the code, the user must provide to verify his request
 
 	// Insert to database
+	transaction_start();
 	$insertId = dm_prepared(
 		"INSERT INTO user_requests (name, first_name, last_name, email, password, verification, house, floor, room, moved_in) VALUES (?,?,?,?,?,?,?,?,?,?)",
 		"ssssssiiis", $name, $firstName, $lastName, $email, $hash, $verificationCode, $house, $floor, $room, $movedIn);
@@ -100,14 +101,12 @@ function request() {
 	if (!$insertId) { http_error(400, "Request denied. Probably the email already exists."); }
 
 	// Send verification email to user
-	query("INSERT INTO user_verification (user, code) VALUES ($insertId, '$code')");
-	$subject = "Your registration at HSH";
-	$message = "Hello $name,\r\nto complete your registration at the HSH page, click this link: <a>hsh.stusta.de/api/user/verify?user=$insertId&code=$code</a>";
-	$headers = "from: noreply@stusta.de";
-	/*if(!mail($email, $subject, $message, $headers)) {
+	if(!verificationMail($email, $name, $insertId, $verificationCode)) {
 		transaction_rollback();
-		http_error(500, "Registration email could not be sent");
-	}*/
+		http_error(500, "Request verification email could not be sent");
+	}
+
+	transaction_commit();
 	
 	// Exclude all columns with sensitive data
 	http_response_code(201);
@@ -229,5 +228,21 @@ function suggest() {
 		LIKE '%$query%'
 	ORDER BY u.name
 	LIMIT 10");
+}
+
+// --------------
+// Helpers
+// --------------
+
+function verificationMail($email, $name, $id, $code) {
+	if ($DEBUG) { return true; }
+
+	$subject = "Your registration request at HSH";
+	$message = "Hello $name,\r\n
+		to complete your registration at the HSH page, click this link: <a>hsh.stusta.de/api/user/verify?user=$id&code=$code</a>\r\n
+		After that, your request will shortly be accepted.\r\n";
+	$headers = "from: noreply@stusta.de";
+
+	return (mail($email, $subject, $message, $headers));
 }
 ?>
