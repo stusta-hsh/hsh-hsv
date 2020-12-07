@@ -8,8 +8,8 @@ switch ($_GET['q']) {
 	case 'login': output(login()); break;
 	case 'create': output(create()); break;
 	case 'request': output(request()); break;
-	case 'register': output(register()); break;
 	case 'verify': output(verify()); break;
+	case 'register': output(register()); break;
 	case 'reset_password': output(reset_password()); break;
 	case 'merge': output(merge()); break;
 	case 'suggest': output(suggest()); break;
