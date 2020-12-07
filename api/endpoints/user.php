@@ -114,21 +114,20 @@ function request() {
 }
 
 function verify() {
-	$user = require_param($_GET['user']);
-	$code = require_param($_GET['code']);
+	$post = param_post();
+	$request = require_param($post['request']);
+	$c_msg = require_param($post['code']);
 
-	transaction_start();
-	$servercode = qp_firstField("SELECT code FROM user_verification WHERE user = ?", "i", $user);
-	if ($servercode == $code) {
-		dm_prepared("UPDATE users SET verified = 1 WHERE id = ?", "i", $user);
-		dm_prepared("DELETE FROM user_verification WHERE user = ?", "i", $user);
-		transaction_commit();
-		return "You have successfully verified your HSH account.";
-	}
-	else {
-		transaction_rollback();
-		http_error(400, "Invalid verification link");
-	}
+	// Retrieve the correct verification code
+	$c_req = qp_firstField("SELECT verification FROM user_requests WHERE id = ?", "i", $request);
+
+	// Check whether the provided code matches the one stored on the server
+	if (strcmp($c_msg, $c_req) != 0) { http_error(400, "Invalid verification link"); }
+	
+	dm_prepared("UPDATE user_requests SET verified = 1 WHERE id = ?", "i", $request);
+
+	http_response_code(201);
+	return qp_firstRow("SELECT id, date, name, email, verified FROM user_requests WHERE id = ?", "i", $request);
 }
 
 function register() {

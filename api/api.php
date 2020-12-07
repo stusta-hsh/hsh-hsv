@@ -2,6 +2,8 @@
 
 require('db.php');
 
+$DEBUG = true;
+
 // ------------
 // IO-Functions
 // ------------
