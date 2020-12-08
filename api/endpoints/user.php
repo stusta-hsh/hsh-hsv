@@ -8,8 +8,8 @@ switch ($_GET['q']) {
 	case 'login': output(login()); break;
 	case 'create': output(create()); break;
 	case 'request': output(request()); break;
-	case 'register': output(register()); break;
 	case 'verify': output(verify()); break;
+	case 'register': output(register()); break;
 	case 'reset_password': output(reset_password()); break;
 	case 'merge': output(merge()); break;
 	case 'suggest': output(suggest()); break;
@@ -17,7 +17,7 @@ switch ($_GET['q']) {
 }
 
 // --------------
-// API-Funktionen
+// API functions
 // --------------
 
 function me() {
@@ -59,7 +59,7 @@ function create() {
 	if (!authorize(2, 3, 4, 18)) { http_error(403, "You are not authorized to create users"); }
 
 	$post = param_post();
-	$name = require_param($post['name']);	// The request must contain at least a name for the new user
+	$name = require_param($post['name']);					// The request must contain at least a name for the new user
 	$firstName = $post['firstName'] ?: "";
 	$lastName = $post['lastName'] ?: "";
 	$email = $post['email'] ?: "";
@@ -71,35 +71,62 @@ function create() {
 
 function request() {
 	$post = param_post();
-	$name = require_param($post['name']);			// The request must contain a name
-	$email = require_param($post['email']);			// and the user credentials
+	$name = require_param($post['name']);					// The request must contain a name
+	$email = require_param($post['email']);					// and the user credentials
 	$password = require_param($post['password']);
 	$firstName = $post['firstName'] ?: "";
 	$lastName = $post['lastName'] ?: "";
 
-	if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+	$house = $floor = $room = $movedIn = null;				// Avoid PHP Notices
+	if (array_key_exists('room', $post)) {					// Optional room object. If included, it must contain all variables
+		$house = require_param($post['room']['house']);
+		$floor = require_param($post['room']['floor']);
+		$room = require_param($post['room']['room']);
+		$movedIn = require_param($post['room']['movedIn']);
+	}
+
+	if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {		// Check for valid email format
 		http_error(400, "Email not in a valid format");
 	}
 	
-	$hash = password_hash($password, PASSWORD_DEFAULT);
+	$hash = password_hash($password, PASSWORD_DEFAULT);		// Create the password hash, that will be stored in the database
+	$verificationCode = bin2hex(random_bytes(10));			// Create the code, the user must provide to verify his request
 
-	// Room is optional
-	if ($post['room']) {
-		$house = $post['room']['house'];
-		$floor = $post['room']['floor'];
-		$room = $post['room']['room'];
-		$movedIn = $post['room']['movedIn'];
+	// Insert to database
+	transaction_start();
+	$insertId = dm_prepared(
+		"INSERT INTO user_requests (name, first_name, last_name, email, password, verification, house, floor, room, moved_in) VALUES (?,?,?,?,?,?,?,?,?,?)",
+		"ssssssiiis", $name, $firstName, $lastName, $email, $hash, $verificationCode, $house, $floor, $room, $movedIn);
 
-		$insertId = dm_prepared("INSERT INTO user_requests (name, first_name, last_name, email, password, house, floor, room, moved_in) VALUES (?,?,?,?,?,?,?,?,?)",
-			"sssssiiis", $name, $firstName, $lastName, $email, $hash, $house, $floor, $room, $movedIn);
-	} else {
-		// If no room is given in the request, don't set it
-		$insertId = dm_prepared("INSERT INTO user_requests (name, first_name, last_name, email, password) VALUES (?,?,?,?,?)",
-			"sssss", $name, $firstName, $lastName, $email, $hash);
+	if (!$insertId) { http_error(400, "Request denied. Probably the email already exists."); }
+
+	// Send verification email to user
+	if(!verificationMail($email, $name, $insertId, $verificationCode)) {
+		transaction_rollback();
+		http_error(500, "Request verification email could not be sent");
 	}
+	transaction_commit();
 	
+	// Exclude all columns with sensitive data
 	http_response_code(201);
-	return q_firstRow("SELECT * FROM user_requests WHERE id = $insertId");
+	return q_firstRow("SELECT id, date, name, first_name, last_name, email, house, floor, room, moved_in FROM user_requests WHERE id = $insertId");
+}
+
+function verify() {
+	$post = param_post();
+	$request = require_param($post['request']);
+	$c_msg = require_param($post['code']);
+
+	// Retrieve the correct verification code
+	$c_req = qp_firstField("SELECT verification FROM user_requests WHERE id = ?", "i", $request);
+
+	// Check whether the provided code matches the one stored on the server
+	if (strcmp($c_msg, $c_req) != 0) { http_error(400, "Invalid verification link"); }
+	
+	dm_prepared("UPDATE user_requests SET verified = 1 WHERE id = ?", "i", $request);
+
+	http_response_code(201);
+	return qp_firstRow("SELECT id, date, name, email, verified FROM user_requests WHERE id = ?", "i", $request);
 }
 
 function register() {
@@ -137,24 +164,6 @@ function register() {
 	transaction_commit();
 	return q_firstRow("SELECT * FROM users WHERE id = $insertId");
 	return true;
-}
-
-function verify() {
-	$user = require_param($_GET['user']);
-	$code = require_param($_GET['code']);
-
-	transaction_start();
-	$servercode = qp_firstField("SELECT code FROM user_verification WHERE user = ?", "i", $user);
-	if ($servercode == $code) {
-		dm_prepared("UPDATE users SET verified = 1 WHERE id = ?", "i", $user);
-		dm_prepared("DELETE FROM user_verification WHERE user = ?", "i", $user);
-		transaction_commit();
-		return "You have successfully verified your HSH account.";
-	}
-	else {
-		transaction_rollback();
-		http_error(400, "Invalid verification link");
-	}
 }
 
 function reset_password() {
@@ -217,5 +226,22 @@ function suggest() {
 		LIKE '%$query%'
 	ORDER BY u.name
 	LIMIT 10");
+}
+
+// --------------
+// Helpers
+// --------------
+
+function verificationMail($email, $name, $id, $code) {
+	global $DEBUG;
+	if ($DEBUG) { return true; }
+
+	$subject = "Your registration request at HSH";
+	$message = "Hello $name,\r\n
+		to complete your registration at the HSH page, click this link: <a>hsh.stusta.de/api/user/verify?user=$id&code=$code</a>\r\n
+		After that, your request will shortly be accepted.\r\n";
+	$headers = "from: noreply@stusta.de";
+
+	return (mail($email, $subject, $message, $headers));
 }
 ?>
