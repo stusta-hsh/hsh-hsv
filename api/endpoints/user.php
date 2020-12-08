@@ -130,40 +130,28 @@ function verify() {
 }
 
 function register() {
-	$name = require_param($_POST['name']);
-	$email = require_param($_POST['email']);
-	$password = require_param($_POST['password']);
-	$firstName = $_POST['firstName'] ?: "";
-	$lastName = $_POST['lastName'] ?: "";
+	if (!authorize(2, 3, 4, 18)) { http_error(403, "You are not authorized to register users"); }
 
-	if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-		http_error(400, "Invalid Email format");
+	$post = param_post();
+	$reqId = require_param($post['request']);
+
+	transaction_start();
+	$request = qp_firstRow("SELECT * FROM user_requests WHERE id = ?", 'i', $reqId);
+	if (!$request) { http_error(409, "Request $reqId doesn't exist. Probably it was already registered."); }
+
+	if (array_key_exists('user', $post)) {
+		$ghost = qp_firstRow("SELECT * FROM users WHERE id = ?", 'i', $post['user']);
+
+		// Ensure, that the given ghost account is actually a ghost
+		if (!$ghost || $ghost['password'] != null) {
+			http_error(409, "User $post[user] doesn't exist or is not a ghost!");
+		}
 	}
 	
-	$hash = password_hash($password, PASSWORD_DEFAULT);
-	$code = bin2hex(random_bytes(10));
-
-	// insert in user table
-	transaction_start();
-	$insertId = dm_prepared("INSERT INTO users (name, first_name, last_name, password, email) VALUES (?,?,?,'$hash',?)", "ssss", $name, $firstName, $lastName, $email);
-	if(!insertId) {
-		transaction_rollback();
-		http_error(400, "User could not be registered. Probably the email already exists.");
-	}
-
-	// Send verification email to user
-	query("INSERT INTO user_verification (user, code) VALUES ($insertId, '$code')");
-	$subject = "Your registration at HSH";
-	$message = "Hello $name,\r\nto complete your registration at the HSH page, click this link: <a>hsh.stusta.de/api/user/verify?user=$insertId&code=$code</a>";
-	$headers = "from: noreply@stusta.de";
-	/*if(!mail($email, $subject, $message, $headers)) {
-		transaction_rollback();
-		http_error(500, "Registration email could not be sent");
-	}*/
 
 	transaction_commit();
-	return q_firstRow("SELECT * FROM users WHERE id = $insertId");
-	return true;
+	http_response_code(204);
+	return;
 }
 
 function reset_password() {
