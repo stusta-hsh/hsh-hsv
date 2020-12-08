@@ -125,8 +125,8 @@ function verify() {
 	
 	dm_prepared("UPDATE user_requests SET verified = 1 WHERE id = ?", "i", $request);
 
-	http_response_code(201);
-	return qp_firstRow("SELECT id, date, name, email, verified FROM user_requests WHERE id = ?", "i", $request);
+	http_response_code(204);
+	return;
 }
 
 function register() {
