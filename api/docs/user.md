@@ -75,7 +75,10 @@ the account, or associate it to an already existing ghost account via `register`
 	*	`firstName`: The user's first name (optional)
 	*	`lastName`: The user's last name (optional)
 	*	`room`: The user's room (optional)
-	*	`moved_in`: The date, when the user moved in the mentioned room (required with `room`) 
+		*	`house`: self-explaining
+		*	`floor`: self-explaining
+		*	`room`: self-explaining
+		*	`moved_in`: The date, when the user moved in the mentioned room
 *	Returns:
 	*	`201`: with the created registration request
 
@@ -100,7 +103,9 @@ request with an already `created` ghost account.
 *	Authorisation: Roles `2`, `3`, `4`, `18`
 *	Parameters:
 	*	`request`: The request ID
-	*	`user`: The ID of a ghost account, that the requester should obtain (optional)
+	*	`ghost`: The ghost account, that the requester should obtain (optional)
+		*	`id`: An already existing user ID, that has no password set to it
+		*	`keep`: A list of properties (`name`, `firstName`, `lastName`, `room`), that shouldn't be overwritten by the values from the request
 *	Returns:
 	*	`204`: if the registration was successful
 	*	`409`: if the request was already accepted or the specified account is not a ghost
