@@ -137,15 +137,43 @@ function register() {
 
 	transaction_start();
 	$request = qp_firstRow("SELECT * FROM user_requests WHERE id = ?", 'i', $reqId);
-	if (!$request) { http_error(409, "Request $reqId doesn't exist. Probably it was already registered."); }
+	if (!$request || $request['verified'] == 0) { 
+		http_error(409, "Request $reqId doesn't exist. Probably it still needs to be verified or it already has been registered.");
+	}
 
-	if (array_key_exists('user', $post)) {
-		$ghost = qp_firstRow("SELECT * FROM users WHERE id = ?", 'i', $post['user']);
+	if (array_key_exists('ghost', $post)) {
+		$id = require_param($post['ghost']['id']);
+		$keep = require_param($post['ghost']['keep']);
+
+		$ghost = qp_firstRow("SELECT * FROM users WHERE id = ?", 'i', $id);
 
 		// Ensure, that the given ghost account is actually a ghost
 		if (!$ghost || $ghost['password'] != null) {
-			http_error(409, "User $post[user] doesn't exist or is not a ghost!");
+			http_error(409, "User $id doesn't exist or is not a ghost!");
 		}
+
+		$prop_name = $request['name'];
+		$prop_firstName = $request['first_name'];
+		$prop_lastName = $request['last_name'];
+		$prop_pw = $request['password'];
+		$prop_email = $request['email'];
+		$prop_room = true;
+		
+		foreach ($keep as $k) {
+			switch ($k) {
+				case 'name': $prop_name = $ghost['name']; break;
+				case 'firstName': $prop_firstName = $ghost['first_name']; break;
+				case 'lastName': $prop_lastName = $ghost['last_name']; break;
+				case 'room': $prop_room = false; break;
+				default: break;
+			}
+		}
+
+		dm_prepared("UPDATE users SET name=?, first_name=?, last_name=?, password=?, email=? WHERE id = ?",
+			'sssssi', $prop_name, $prop_firstName, $prop_lastName, $prop_pw, $prop_email, $id);
+	}
+	else {
+		dm_prepared("INSERT INTO users (name, first_name, last_name");
 	}
 	
 
