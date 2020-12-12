@@ -97,7 +97,7 @@ managed with a verification E-Mail containing a personalized link, that leads to
 
 ### Register
 Used by floor representatives or other authorized persons to associate a `verified` registration
-request with an already `created` ghost account.
+request with an already `created` ghost account or creates a new account from the request.
 *	URI: `/api/user/register`
 *	Method: `POST`
 *	Authorisation: Roles `2`, `3`, `4`, `18`
@@ -105,7 +105,9 @@ request with an already `created` ghost account.
 	*	`request`: The request ID
 	*	`ghost`: The ghost account, that the requester should obtain (optional)
 		*	`id`: An already existing user ID, that has no password set to it
-		*	`keep`: A list of properties (`name`, `firstName`, `lastName`, `room`), that shouldn't be overwritten by the values from the request
+		*	`keep`: A list of properties (`name`, `firstName`, `lastName`, `room`),
+			that shouldn't be overwritten by the values from the request
+			*	`lol`: This is lol
 *	Returns:
 	*	`204`: if the registration was successful
 	*	`409`: if the request was already accepted or the specified account is not a ghost
