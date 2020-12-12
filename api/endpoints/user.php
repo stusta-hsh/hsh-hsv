@@ -133,14 +133,17 @@ function register() {
 	if (!authorize(2, 3, 4, 18)) { http_error(403, "You are not authorized to register users"); }
 
 	$post = param_post();
-	$req_id = require_param($post['request']);
+	$req_id = require_param($post['request']);				// The request, that should now become a user entry
 
-	transaction_start();
+	transaction_start();									// Prevent database integrity errors
+
+	// Get the request from the database and check validity
 	$request = qp_firstRow("SELECT * FROM user_requests WHERE id = ?", 'i', $req_id);
 	if (!$request || $request['verified'] == 0) { 
 		http_error(409, "Request $reqId doesn't exist. Probably it still needs to be verified or it already has been registered.");
 	}
 
+	// The values of the new user entry
 	$req_name = $request['name'];
 	$req_firstName = $request['first_name'];
 	$req_lastName = $request['last_name'];
@@ -148,9 +151,10 @@ function register() {
 	$req_email = $request['email'];
 	$req_room = true;
 
+	// If a ghost account is given, edit the existing user entry
 	if (array_key_exists('ghost', $post)) {
 		$id = require_param($post['ghost']['id']);
-		$keep = require_param($post['ghost']['keep']);
+		$keep = require_param($post['ghost']['keep']);		// A list of attributes, that should not be overwritten by the request
 
 		$ghost = qp_firstRow("SELECT * FROM users WHERE id = ?", 'i', $id);
 
@@ -158,7 +162,8 @@ function register() {
 		if (!$ghost || $ghost['password'] != null) {
 			http_error(409, "User $id doesn't exist or is not a ghost!");
 		}
-		
+
+		// If an attribute appears in the keep-list, set it to its curent value
 		foreach ($keep as $k) {
 			switch ($k) {
 				case 'name': $req_name = $ghost['name']; break;
@@ -172,14 +177,16 @@ function register() {
 		dm_prepared("UPDATE users SET name=?, first_name=?, last_name=?, password=?, email=? WHERE id = ?",
 			'sssssi', $req_name, $req_firstName, $req_lastName, $req_pw, $req_email, $id);
 	}
+	// If no ghost account is given, simply create the new user entry
 	else {
 		dm_prepared("INSERT INTO users (name, first_name, last_name, password, email) VALUES (?,?,?,?,?)",
 			'sssss', $req_name, $req_firstName, $req_lastName, $req_pw, $req_email);
 	}
 	
+	// Delete the reqest and finish
 	dm_prepared("DELETE FROM user_requests WHERE id=?", 's', $req_id);
-
 	transaction_commit();
+
 	http_response_code(204);
 	return;
 }

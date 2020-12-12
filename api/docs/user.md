@@ -107,7 +107,6 @@ request with an already `created` ghost account or creates a new account from th
 		*	`id`: An already existing user ID, that has no password set to it
 		*	`keep`: A list of properties (`name`, `firstName`, `lastName`, `room`),
 			that shouldn't be overwritten by the values from the request
-			*	`lol`: This is lol
 *	Returns:
 	*	`204`: if the registration was successful
 	*	`409`: if the request was already accepted or the specified account is not a ghost
