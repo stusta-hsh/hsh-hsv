@@ -84,7 +84,7 @@ function fun() {
 	// Find the section about the required function
 	$i = 0; $l = strlen($fun) + 4;
 	while ($file[$i] && strcmp(substr($file[$i], 0, $l), "### $fun") != 0) { $i++; }
-	if (!$file[$i]) { http_error(400, "The function $fun doesn't exist in this endpoint."); }
+	if (!$file[$i]) { http_error(400, "The documentation to the function $fun doesn't exist in this endpoint."); }
 	$i++;
 
 	$desc = "";
@@ -130,7 +130,7 @@ function shortcut() {
 
 function docfile($endpoint) {
 	$file = file("../docs/$endpoint.md");
-	if (!$file) { http_error(400, "The endpoint \"$endpoint\" doesn't exist."); }
+	if (!$file) { http_error(400, "The documentation of the endpoint \"$endpoint\" doesn't exist."); }
 	return $file;
 }
 
@@ -138,15 +138,29 @@ function multilineAttribute($file, &$i, $name) {
 	$params = array();
 	while ($file[$i+1][0] == "\t") {
 		$i++;
-		if ($file[$i][1] != "*") {
-			$params[array_key_last($params)]['desc'] .= " " . substr($file[$i], 2, -1);
-			continue;
-		}
+		$star = strpos($file[$i], '*');
 		$colon = strpos($file[$i], ':');
-		array_push($params, array(
-			$name => substr($file[$i], 4, $colon - 5),
-			'desc' => substr($file[$i], $colon + 2, -1)
-		));
+		
+		if (!$star) {
+			if (strcmp(trim($file[$i]), "") == 0) { continue; }
+
+			$last =& $params;
+			while (array_key_last($last) != 'desc') {
+				$last =& $last[array_key_last($last)];
+			}
+			$last['desc'] .= " " . trim($file[$i]);
+		}
+		else {
+			$push =& $params;
+			for ($j = 1; $j < $star; $j++) {
+				$push =& $push[array_key_last($push)]['params'];
+			}
+			if (!isset($push)) { $push = array(); }
+			array_push($push, array(
+				$name => substr($file[$i], $star + 3, $colon - $star - 4),
+				'desc' => substr($file[$i], $colon + 2, -1)
+			));
+		}
 	}
 	return $params;
 }
@@ -154,7 +168,7 @@ function multilineAttribute($file, &$i, $name) {
 function findFun($file) {
 	$i = 0;
 	while ($file[$i] && substr($file[$i], 0, 12+strlen($_GET['u'])) != "*\tURI: `/api" . $_GET['u']) { $i++; }
-	if (!$file[$i]) { http_error(400, "The function $_GET[u] doesn't exist in this endpoint."); }
+	if (!$file[$i]) { http_error(400, "The documentation to the function $_GET[u] doesn't exist in this endpoint."); }
 	while (substr($file[$i], 0, 3) != '###') { $i--; }
 	return substr($file[$i], 4, -1);
 }

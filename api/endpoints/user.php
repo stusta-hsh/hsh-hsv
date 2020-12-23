@@ -125,45 +125,70 @@ function verify() {
 	
 	dm_prepared("UPDATE user_requests SET verified = 1 WHERE id = ?", "i", $request);
 
-	http_response_code(201);
-	return qp_firstRow("SELECT id, date, name, email, verified FROM user_requests WHERE id = ?", "i", $request);
+	http_response_code(204);
+	return;
 }
 
 function register() {
-	$name = require_param($_POST['name']);
-	$email = require_param($_POST['email']);
-	$password = require_param($_POST['password']);
-	$firstName = $_POST['firstName'] ?: "";
-	$lastName = $_POST['lastName'] ?: "";
+	if (!authorize(2, 3, 4, 18)) { http_error(403, "You are not authorized to register users"); }
 
-	if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-		http_error(400, "Invalid Email format");
+	$post = param_post();
+	$req_id = require_param($post['request']);				// The request, that should now become a user entry
+
+	transaction_start();									// Prevent database integrity errors
+
+	// Get the request from the database and check validity
+	$request = qp_firstRow("SELECT * FROM user_requests WHERE id = ?", 'i', $req_id);
+	if (!$request || $request['verified'] == 0) { 
+		http_error(409, "Request $reqId doesn't exist. Probably it still needs to be verified or it already has been registered.");
+	}
+
+	// The values of the new user entry
+	$req_name = $request['name'];
+	$req_firstName = $request['first_name'];
+	$req_lastName = $request['last_name'];
+	$req_pw = $request['password'];
+	$req_email = $request['email'];
+	$req_room = true;
+
+	// If a ghost account is given, edit the existing user entry
+	if (array_key_exists('ghost', $post)) {
+		$id = require_param($post['ghost']['id']);
+		$keep = require_param($post['ghost']['keep']);		// A list of attributes, that should not be overwritten by the request
+
+		$ghost = qp_firstRow("SELECT * FROM users WHERE id = ?", 'i', $id);
+
+		// Ensure, that the given ghost account is actually a ghost
+		if (!$ghost || $ghost['password'] != null) {
+			http_error(409, "User $id doesn't exist or is not a ghost!");
+		}
+
+		// If an attribute appears in the keep-list, set it to its curent value
+		foreach ($keep as $k) {
+			switch ($k) {
+				case 'name': $req_name = $ghost['name']; break;
+				case 'firstName': $req_firstName = $ghost['first_name']; break;
+				case 'lastName': $req_lastName = $ghost['last_name']; break;
+				case 'room': $req_room = false; break;
+				default: break;
+			}
+		}
+
+		dm_prepared("UPDATE users SET name=?, first_name=?, last_name=?, password=?, email=? WHERE id = ?",
+			'sssssi', $req_name, $req_firstName, $req_lastName, $req_pw, $req_email, $id);
+	}
+	// If no ghost account is given, simply create the new user entry
+	else {
+		dm_prepared("INSERT INTO users (name, first_name, last_name, password, email) VALUES (?,?,?,?,?)",
+			'sssss', $req_name, $req_firstName, $req_lastName, $req_pw, $req_email);
 	}
 	
-	$hash = password_hash($password, PASSWORD_DEFAULT);
-	$code = bin2hex(random_bytes(10));
-
-	// insert in user table
-	transaction_start();
-	$insertId = dm_prepared("INSERT INTO users (name, first_name, last_name, password, email) VALUES (?,?,?,'$hash',?)", "ssss", $name, $firstName, $lastName, $email);
-	if(!insertId) {
-		transaction_rollback();
-		http_error(400, "User could not be registered. Probably the email already exists.");
-	}
-
-	// Send verification email to user
-	query("INSERT INTO user_verification (user, code) VALUES ($insertId, '$code')");
-	$subject = "Your registration at HSH";
-	$message = "Hello $name,\r\nto complete your registration at the HSH page, click this link: <a>hsh.stusta.de/api/user/verify?user=$insertId&code=$code</a>";
-	$headers = "from: noreply@stusta.de";
-	/*if(!mail($email, $subject, $message, $headers)) {
-		transaction_rollback();
-		http_error(500, "Registration email could not be sent");
-	}*/
-
+	// Delete the reqest and finish
+	dm_prepared("DELETE FROM user_requests WHERE id=?", 's', $req_id);
 	transaction_commit();
-	return q_firstRow("SELECT * FROM users WHERE id = $insertId");
-	return true;
+
+	http_response_code(204);
+	return;
 }
 
 function reset_password() {
@@ -173,45 +198,6 @@ function reset_password() {
 	$hash = password_hash($password, PASSWORD_DEFAULT);
 	query("UPDATE users SET password = '$hash' WHERE id = $user");
 	return true;
-}
-
-function merge() {
-	authorize(0);
-	//$merger = authenticate();
-	
-	$uid1 = require_param($_POST['primary_user']);
-	$uid2 = require_param($_POST['secondary_user']);
-
-	$user1 = qp_firstRow("SELECT * FROM users WHERE id=?", "i", $uid1);
-	$user2 = qp_firstRow("SELECT * FROM users WHERE id=?", "i", $uid2);
-
-	merge_property($user1, $user2, 'name');
-	merge_property($user1, $user2, 'first_name');
-	merge_property($user1, $user2, 'last_name');
-	merge_property($user1, $user2, 'password');
-	merge_property($user1, $user2, 'email');
-	merge_property($user1, $user2, 'verified');
-
-	dm_prepared("UPDATE users SET name=?, first_name=?, last_name=?, password=?, email=?, verified=? WHERE id=?", 'sssssii', 
-		$user1['name'], $user1['first_name'], $user1['last_name'], $user1['password'], $user1['email'], $user1['verified'], $user1['id']);
-	dm_prepared("DELETE FROM users WHERE id=?", "i", $uid2);
-}
-
-function merge_property(&$o1, &$o2, $property) {
-	if ($o1[$property] == $o2[$property])
-		return true;
-
-	if ($o1[$property] == null || $o1[$property] == "" || $o1[$property] == 0) {
-		$o1[$property] = $o2[$property];
-		return true;
-	}
-
-	if ($o2[$property] == null || $o2[$property] == "" || $o2[$property] == 0) {
-		$o2[$property] = $o1[$property];
-		return true;
-	}
-
-	return false;
 }
 
 function suggest() {
