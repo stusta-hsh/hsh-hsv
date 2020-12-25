@@ -1,12 +1,57 @@
-body{
-	margin: 0px;
-
-	--primary-color: #03aa2a;
-	--secondary-color: #ace5b9;
-	--primary-font-color: #222;
-	--secondary-font-color: rgba(0,0,0,0.6);
-	--tertiary-font-color: rgba(0,0,0,0.4);
-	--zebra-color: rgba(0,0,0,0.05);
+@font-face {
+	font-family: Futura;
+    src: url("../fonts/Futura-Medium.otf") format("opentype");
+    font-weight: 400
+}
+@font-face {
+	font-family: Futura;
+    src: url("../fonts/Futura-Light.otf") format("opentype");
+    font-weight: 200
+}
+@font-face {
+	font-family: Garamond;
+	src: url("../fonts/Garamond-Regular.otf") format("opentype");
 }
 
-h3{ color: var(--primary-color); font-size:32pt; font-weight: normal;}
+:root {
+    --accent: #00A651;
+}
+
+html {
+    max-width: 40em;
+    margin: 0 auto;
+    background-color: #EEE;
+}
+
+div {
+    font-family: Garamond;
+    text-align: justify;
+    line-height: 125%;
+    background-color: #FFF;
+}
+
+h1 {
+    font-family: Futura;
+    font-weight: 200;
+    font-size: 117%;
+    color: var(--accent);
+    border-bottom: 0.35pt solid var(--accent);
+    padding-bottom: 0.5em
+}
+
+ol { list-style: outside decimal }
+ol > ol { list-style: outside lower-latin; }
+ol > ol > ol { list-style: outside upper-latin; }
+ol > ol > ol > ol { list-style: outside upper-roman; }
+
+a {
+    font-family: Futura;
+    font-size: 92%;
+    color: black;
+    text-decoration: none;
+}
+
+textarea {
+    width: 100%;
+    height: 50em;
+}
