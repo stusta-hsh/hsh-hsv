@@ -1,0 +1,12 @@
+body{
+	margin: 0px;
+
+	--primary-color: #03aa2a;
+	--secondary-color: #ace5b9;
+	--primary-font-color: #222;
+	--secondary-font-color: rgba(0,0,0,0.6);
+	--tertiary-font-color: rgba(0,0,0,0.4);
+	--zebra-color: rgba(0,0,0,0.05);
+}
+
+h3{ color: var(--primary-color); font-size:32pt; font-weight: normal;}
