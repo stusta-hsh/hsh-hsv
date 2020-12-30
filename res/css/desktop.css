@@ -9,40 +9,34 @@
     font-weight: 200
 }
 @font-face {
+	font-family: Futura;
+    src: url("../fonts/Futura-LightOblique.otf") format("opentype");
+    font-weight: 200;
+    font-style: oblique;
+}
+@font-face {
 	font-family: Garamond;
 	src: url("../fonts/Garamond-Regular.otf") format("opentype");
 }
 
 :root {
     --accent: #00A651;
+    --accent-light: #3dd191;
 }
 
 html {
-    max-width: 40em;
     margin: 0 auto;
     background-color: #EEE;
-}
-
-div {
     font-family: Garamond;
+	text-align: center;
+	padding: 0px 0px 15px 0px;
+}
+
+p {
     text-align: justify;
+    text-align-last: center;
     line-height: 125%;
-    background-color: #FFF;
 }
-
-h1 {
-    font-family: Futura;
-    font-weight: 200;
-    font-size: 117%;
-    color: var(--accent);
-    border-bottom: 0.35pt solid var(--accent);
-    padding-bottom: 0.5em
-}
-
-ol { list-style: outside decimal }
-ol > ol { list-style: outside lower-latin; }
-ol > ol > ol { list-style: outside upper-latin; }
-ol > ol > ol > ol { list-style: outside upper-roman; }
 
 a {
     font-family: Futura;
@@ -51,7 +45,84 @@ a {
     text-decoration: none;
 }
 
-textarea {
+.input {
+    margin: 14px;
+}
+
+label {
+    display: block;
+    text-align: left;
+    font-family: Futura;
+    font-weight: 200;
+    font-style: oblique;
+    font-size: 14px;
+}
+
+input[type=text], input[type=email], input[type=password] {
+    display: block;
     width: 100%;
-    height: 50em;
+    border: none;
+    border-bottom: 2px solid var(--accent);
+}
+
+input[type=button] {
+    padding: 8px 14px;
+    background-color: var(--accent);
+    border: none;
+    border-radius: 3px;
+    font-family: Futura;
+    color: white;
+}
+
+ol { list-style: outside decimal }
+ol > ol { list-style: outside lower-latin; }
+ol > ol > ol { list-style: outside upper-latin; }
+ol > ol > ol > ol { list-style: outside upper-roman; }
+
+.card {
+    width: 60%;
+    height: auto;
+    background-color: #fff;
+	border-radius: 3px;
+	box-shadow: 1px 2px 3px 1px #ccc;
+    margin: auto;
+    overflow: auto;
+}
+
+.card .title {
+    font-family: Futura;
+    font-weight: 400;
+    font-size: 20px;
+    text-align: left;
+    padding: 8px 15px;
+}
+
+.card .content {
+    float: left;
+}
+
+.split-2 {
+    display: flex;
+    overflow: auto;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.split-2 .content {
+    width: 50%;
+}
+.split-3 .content {
+    width: 33%;
+}
+
+.split-2 .content img {
+    width: 50%;
+}
+
+p.content {
+    width: 100%;
+}
+
+.form {
+    text-align: left;
 }
