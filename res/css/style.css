@@ -21,7 +21,7 @@
 
 :root {
 	--accent: #00A651;
-	--accent-light: #3dd191;
+	--accent-contrast: #008944; /*contrast to white: 4.5:1 as required by WCAG AA*/
 }
 
 html {
@@ -74,7 +74,7 @@ input[type=text], input[type=email], input[type=password] {
 
 input[type=button] {
 	padding: 8px 14px;
-	background-color: var(--accent);
+	background-color: var(--accent-contrast);
 	border: none;
 	border-radius: 3px;
 	font-family: Futura;
