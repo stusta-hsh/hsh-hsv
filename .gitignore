@@ -4,5 +4,5 @@ api/db_config.php
 res/fonts/*
 #font files
 
-lib/*.js
+res/lib/*
 #libraries (jQuery)
