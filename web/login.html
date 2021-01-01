@@ -26,7 +26,7 @@
 					<label for="pwd">Password</label>
 					<input type="password" id="pwd" name="password"/>
 				</div>
-				<input class='input' type='button' value='Login'>
+				<input class='input' id='loginButton' type='button' value='Login'>
 			</div>
 		</div>
 		
@@ -35,12 +35,15 @@
 
 <script>
 
-$("button").click(function() {
-	$.post("api/user/login",
-		"email=" + $("#email").val() + "&password=" + $("#password").val(),
-		function(data, status) {
+$("#loginButton").click(function() {
+	$.ajax("api/user/login", {
+		type: "POST",
+		contentType: "application/json",
+		data: JSON.stringify({email: $("#email").val(), password: $("#pwd").val()}),
+		success: function() {
 			window.location.href = "index";
-		});
+		}
+	});
 })
 
 </script>

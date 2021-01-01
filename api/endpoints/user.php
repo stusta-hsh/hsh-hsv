@@ -27,8 +27,9 @@ function me() {
 }
 
 function login() {
-	$email = require_param($_POST['email']);				// The request must contain the users email address
-	$password = require_param($_POST['password']);			// as well as the password (in plaintext, sent over https)
+	$post = param_post();
+	$email = require_param($post['email']);				// The request must contain the users email address
+	$password = require_param($post['password']);		// as well as the password (in plaintext, sent over https)
 
 	// Query the hashed password of the user
 	$hash = qp_firstField("SELECT password FROM users WHERE email = ?", "s", $email);
