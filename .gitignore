@@ -1,2 +1,8 @@
 api/db_config.php
 #contains database credentials
+
+res/fonts/*
+#font files
+
+lib/*.js
+#libraries (jQuery)

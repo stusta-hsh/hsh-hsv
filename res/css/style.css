@@ -29,13 +29,14 @@ html {
     background-color: #EEE;
     font-family: Garamond;
 	text-align: center;
-	padding: 0px 0px 15px 0px;
+	padding: 5px 0px 20px 0px;
 }
 
 p {
     text-align: justify;
     text-align-last: center;
     line-height: 125%;
+    padding: 8px 14px;
 }
 
 a {
@@ -80,13 +81,11 @@ ol > ol > ol { list-style: outside upper-latin; }
 ol > ol > ol > ol { list-style: outside upper-roman; }
 
 .card {
-    width: 60%;
-    height: auto;
+    max-width: 600px;
     background-color: #fff;
 	border-radius: 3px;
 	box-shadow: 1px 2px 3px 1px #ccc;
     margin: auto;
-    overflow: auto;
 }
 
 .card .title {
@@ -94,35 +93,31 @@ ol > ol > ol > ol { list-style: outside upper-roman; }
     font-weight: 400;
     font-size: 20px;
     text-align: left;
-    padding: 8px 15px;
+    padding: 20px;
 }
 
-.card .content {
-    float: left;
-}
-
-.split-2 {
+.split {
     display: flex;
-    overflow: auto;
-    align-items: center;
-    margin-bottom: 24px;
+    flex-direction: column;
 }
 
-.split-2 .content {
-    width: 50%;
-}
-.split-3 .content {
-    width: 33%;
+.split > * {
+    flex-grow: 1;
+    padding: 12px 20px;
 }
 
-.split-2 .content img {
-    width: 50%;
+.split > .img {
+    margin: auto;
 }
-
-p.content {
-    width: 100%;
+.split > .img > * {
+    width: 80%;
+    min-height: 120px;
 }
 
 .form {
     text-align: left;
+}
+
+@media screen and (min-width: 415px) {
+    .split { flex-direction: row; }
 }
