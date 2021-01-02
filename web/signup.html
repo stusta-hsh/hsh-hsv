@@ -38,7 +38,7 @@
 					<label for="pwd">Password*</label>
 					<input type="password" id="pwd"/>
 				</div>
-				<input class='input' id='loginButton' type='button' value='Sign up'>
+				<input class='input' id='signupButton' type='button' value='Sign up'>
 			</div>
 		</div>
 		
@@ -47,18 +47,21 @@
 
 <script>
 
-$("button").click(function() {
-	$.post("api/user/register",
-		{
-            name: $("#name").val(),
-            first_name: $("#first_name").val(),
-            last_name: $("#last_name").val(),
+$("#signupButton").click(function() {
+	$.ajax("api/user/request", {
+		type: "POST",
+		contentType: "application/json",
+		data: JSON.stringify({
+			name: $("#name").val(),
+            firstName: $("#firstName").val(),
+            lastName: $("#lastName").val(),
             email: $("#email").val(),
-            password: $("#password").val()
-        },
-		function(data, status) {
+            password: $("#pwd").val()
+		}),
+		success: function() {
 			window.location.href = "index";
-		});
+		}
+	});
 })
 
 </script>
