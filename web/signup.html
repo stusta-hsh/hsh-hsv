@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<link href="res/css/screen.css" rel="stylesheet" type="text/css" media="all">
+	<script src="res/lib/jquery-3.5.1.js"></script>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+	<title>HSH Signup</title>
+</head>
+
+<body>
+	<div class='card'>
+		<p class='title'>Sign up</p>
+		
+		<div class='split'>
+			<div class='img'>
+				<img src='res/icon.svg' alt='HSH Logo'>
+			</div>
+
+			<div class='form'>
+				<div class='input'>
+					<label for="name">Short Name*</label>
+					<input type="text" id="name"/>
+				</div>
+				<div class='input'>
+					<label for="firstName">First Name</label>
+					<input type="text" id="firstName"/>
+				</div>
+				<div class='input'>
+					<label for="lastName">Last Name</label>
+					<input type="text" id="lastName"/>
+				</div>
+				<div class='input'>
+					<label for="email">Email*</label>
+					<input type="email" id="email"/>
+				</div>
+				<div class='input'>
+					<label for="pwd">Password*</label>
+					<input type="password" id="pwd"/>
+				</div>
+				<input class='input' id='loginButton' type='button' value='Sign up'>
+			</div>
+		</div>
+		
+		<p>The fields marked with a * are required.</p>
+	</div>
+
+<script>
+
+$("button").click(function() {
+	$.post("api/user/register",
+		{
+            name: $("#name").val(),
+            first_name: $("#first_name").val(),
+            last_name: $("#last_name").val(),
+            email: $("#email").val(),
+            password: $("#password").val()
+        },
+		function(data, status) {
+			window.location.href = "index";
+		});
+})
+
+</script>
+</body>
+</html>
