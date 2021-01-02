@@ -1,0 +1,127 @@
+@font-face {
+	font-family: Futura;
+	src: url("../fonts/Futura-Medium.otf") format("opentype");
+	font-weight: 400
+}
+@font-face {
+	font-family: Futura;
+	src: url("../fonts/Futura-Light.otf") format("opentype");
+	font-weight: 200
+}
+@font-face {
+	font-family: Futura;
+	src: url("../fonts/Futura-LightOblique.otf") format("opentype");
+	font-weight: 200;
+	font-style: oblique;
+}
+@font-face {
+	font-family: Garamond;
+	src: url("../fonts/Garamond-Regular.otf") format("opentype");
+}
+
+:root {
+	--accent: #00A651;
+	--accent-contrast: #008944; /*contrast to white: 4.5:1 as required by WCAG AA*/
+}
+
+html {
+	margin: 0 auto;
+	background-color: #EEE;
+	font-family: Garamond;
+	text-align: center;
+	padding: 5px 0px 20px 0px;
+}
+
+p {
+	text-align: center;
+	line-height: 125%;
+	padding: 8px 14px;
+}
+
+a {
+	font-family: Futura;
+	font-size: 92%;
+	color: black;
+	text-decoration: none;
+}
+
+.input {
+	margin: 14px;
+}
+
+label {
+	display: block;
+	text-align: left;
+	font-family: Futura;
+	font-weight: 200;
+	font-style: oblique;
+	font-size: 14px;
+}
+
+input {
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+}
+
+input[type=text], input[type=email], input[type=password] {
+	display: block;
+	width: 100%;
+	border: none;
+	border-radius: 0px; /*Safari for iOS*/
+	border-bottom: 2px solid var(--accent);
+}
+
+input[type=button] {
+	padding: 8px 14px;
+	background-color: var(--accent-contrast);
+	border: none;
+	border-radius: 3px;
+	font-family: Futura;
+	color: white;
+}
+
+ol { list-style: outside decimal }
+ol > ol { list-style: outside lower-latin; }
+ol > ol > ol { list-style: outside upper-latin; }
+ol > ol > ol > ol { list-style: outside upper-roman; }
+
+.card {
+	max-width: 600px;
+	background-color: white;
+	border-radius: 3px;
+	box-shadow: 1px 2px 3px 1px #ccc;
+	margin: auto;
+}
+
+.card .title {
+	font-family: Futura;
+	font-weight: 400;
+	font-size: 20px;
+	padding: 20px;
+}
+
+.split {
+	display: flex;
+	flex-direction: column;
+}
+
+.split > * {
+	flex-grow: 1;
+	padding: 12px 20px;
+}
+
+.split > .img {
+	margin: auto;
+}
+.split > .img > * {
+	min-height: 120px;
+}
+
+.form {
+	text-align: left;
+}
+
+@media screen and (min-width: 415px) {
+	.split { flex-direction: row; }
+}

@@ -2,29 +2,48 @@
 <html>
 
 <head>
+	<link href="res/css/screen.css" rel="stylesheet" type="text/css" media="all">
+	<script src="res/lib/jquery-3.5.1.js"></script>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 	<title>HSH Login</title>
-	<script src="lib/jquery-3.5.1.js"></script>
 </head>
 
 <body>
-	<h3>HSH Login</h3>
-	
-	<label for="username">Email:</label><br/>
-	<input type="email" id="email" name="email"/><br/>
-	<label for="pwd">Password:</label><br/>
-	<input type="password" id="password" name="password"/><br/>
-	<button>Login</button>
+	<div class='card'>
+		<p class='title'>Login</p>
+		
+		<div class='split'>
+			<div class='img'>
+				<img src='res/icon.svg' alt='HSH Logo'>
+			</div>
 
-	<p>Don't have an account? <a href="register">Register.</a></p>
+			<div class='form'>
+				<div class='input'>
+					<label for="email">Email</label>
+					<input type="email" id="email" name="email"/>
+				</div>
+				<div class='input'>
+					<label for="pwd">Password</label>
+					<input type="password" id="pwd" name="password"/>
+				</div>
+				<input class='input' id='loginButton' type='button' value='Login'>
+			</div>
+		</div>
+		
+		<p>Don't have an account? <a href="register">Register.</a></p>
+	</div>
 
 <script>
 
-$("button").click(function() {
-	$.post("api/user/login",
-		"email=" + $("#email").val() + "&password=" + $("#password").val(),
-		function(data, status) {
+$("#loginButton").click(function() {
+	$.ajax("api/user/login", {
+		type: "POST",
+		contentType: "application/json",
+		data: JSON.stringify({email: $("#email").val(), password: $("#pwd").val()}),
+		success: function() {
 			window.location.href = "index";
-		});
+		}
+	});
 })
 
 </script>
