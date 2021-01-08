@@ -27,12 +27,14 @@
 html {
 	margin: 0 auto;
 	background-color: #EEE;
-	font-family: Garamond;
+	font-family: Futura;
 	text-align: center;
 	padding: 5px 0px 20px 0px;
 }
 
 p {
+	font-family: Garamond;
+	font-style: normal;
 	text-align: center;
 	line-height: 125%;
 	padding: 8px 14px;
@@ -58,18 +60,32 @@ label {
 	font-size: 14px;
 }
 
+label > details {
+	display: inline;
+}
+
+label > details > * {
+	padding: 0px;
+	margin: 0px;
+	text-align: left;
+}
+
 input {
 	-webkit-appearance: none;
 	-moz-appearance: none;
 	appearance: none;
 }
 
-input[type=text], input[type=email], input[type=password] {
+input[type=text], input[type=email], input[type=password], input[type=number], input[type=room] {
 	display: block;
 	width: 100%;
 	border: none;
 	border-radius: 0px; /*Safari for iOS*/
 	border-bottom: 2px solid var(--accent);
+}
+
+input:invalid {
+	border-bottom: 2px solid red;
 }
 
 input[type=button] {

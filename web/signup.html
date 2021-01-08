@@ -20,7 +20,7 @@
 			<div class='form'>
 				<div class='input'>
 					<label for="name">Short Name*</label>
-					<input type="text" id="name"/>
+					<input type="text" id="name" required/>
 				</div>
 				<div class='input'>
 					<label for="firstName">First Name</label>
@@ -31,12 +31,23 @@
 					<input type="text" id="lastName"/>
 				</div>
 				<div class='input'>
+					<label for="room">
+						<details>
+							<summary>Room</summary>
+							<p>Room number in the form House/Floor/Room, where the last slash is optional.</p>
+							<p>If no house number is given, 9 (HSH) is assumed.</p>
+							<p>In house 14, the WG number replaces the floor number.</p>
+						</details>
+					</label>
+					<input type="room" id="room" pattern='^([0-9]{1,2}\/)?[0-9]{0,2}\/?[0-9]{1,2}$'/>
+				</div>
+				<div class='input'>
 					<label for="email">Email*</label>
-					<input type="email" id="email"/>
+					<input type="email" id="email" required/>
 				</div>
 				<div class='input'>
 					<label for="pwd">Password*</label>
-					<input type="password" id="pwd"/>
+					<input type="password" id="pwd" required/>
 				</div>
 				<input class='input' id='signupButton' type='button' value='Sign up'>
 			</div>
@@ -46,6 +57,13 @@
 	</div>
 
 <script>
+
+$("#room").change(function(e) {
+	/*var regex = /^([0-9]{1,2}\/)?[0-9]{1,4}$/g;
+	if ($("#room").val().match(regex) == null) {
+		$("#room").setCustomValidity('not a room number');
+	}*/
+});
 
 $("#signupButton").click(function() {
 	$.ajax("api/user/request", {
