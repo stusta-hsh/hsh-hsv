@@ -35,12 +35,13 @@ html {
 p {
 	font-family: Garamond;
 	font-style: normal;
+	font-weight: 400;
 	text-align: center;
 	line-height: 125%;
 	padding: 8px 14px;
 }
 
-a {
+.reference, a {
 	font-family: Futura;
 	font-size: 92%;
 	color: black;
@@ -62,6 +63,10 @@ label {
 
 label > details {
 	display: inline;
+}
+
+label > details > summary::marker {
+	content: "";
 }
 
 label > details > * {
@@ -88,7 +93,7 @@ input:invalid {
 	border-bottom: 2px solid red;
 }
 
-input[type=button] {
+input[type=button], input[type=submit] {
 	padding: 8px 14px;
 	background-color: var(--accent-contrast);
 	border: none;

@@ -18,7 +18,7 @@
 				<img src='res/icon.svg' alt='HSH Logo'>
 			</div>
 
-			<div class='form'>
+			<form id='form-signup' class='form' action="javascript:void(0);">
 				<div class='input'>
 					<label for="name">Short Name*</label>
 					<input type="text" id="name" required/>
@@ -50,8 +50,8 @@
 					<label for="pwd">Password*</label>
 					<input type="password" id="pwd" required/>
 				</div>
-				<input class='input' id='signupButton' type='button' value='Sign up'>
-			</div>
+				<input class='input' type='submit' value='Sign up'>
+			</form>
 		</div>
 		
 		<p>The fields marked with a * are required.</p>
@@ -59,23 +59,21 @@
 
 <script>
 
-$("#room").change(function(e) {
-	/*var regex = /^([0-9]{1,2}\/)?[0-9]{1,4}$/g;
-	if ($("#room").val().match(regex) == null) {
-		$("#room").setCustomValidity('not a room number');
-	}*/
-});
-
-$("#signupButton").click(function() {
-	$.ajax("api/user/request", {
+$("#form-signup").submit(function() {
+	$.ajax("api/user/requesta", {
 		type: "POST",
 		contentType: "application/json",
 		data: JSON.stringify({
 			name: $("#name").val(),
-            firstName: $("#firstName").val(),
-            lastName: $("#lastName").val(),
-            email: $("#email").val(),
-            password: $("#pwd").val()
+			email: $("#email").val(),
+			password: $("#pwd").val(),
+			firstName: ($("#firstName").val() ? $("#firstName").val() : undefined),
+			lastName: ($("#lastName").val() ? $("#lastName").val() : undefined),
+			room: ($("#room").val() ? {
+				house: 1,
+				floor: 1,
+				room: 1
+			} : undefined)
 		}),
 		success: function() {
 			window.location.href = "index";
