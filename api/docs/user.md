@@ -78,7 +78,7 @@ the account, or associate it to an already existing ghost account via `register`
 		*	`house`: self-explaining
 		*	`floor`: self-explaining
 		*	`room`: self-explaining
-		*	`moved_in`: The date, when the user moved in the mentioned room
+		*	`movedIn`: The date, when the user moved in the mentioned room
 *	Returns:
 	*	`201`: with the created registration request
 

@@ -17,7 +17,7 @@
 				<img src='res/icon.svg' alt='HSH Logo'>
 			</div>
 
-			<div class='form'>
+			<form id='form-login' action="javascript:void(0);">
 				<div class='input'>
 					<label for="email">Email</label>
 					<input type="email" id="email" name="email"/>
@@ -26,7 +26,7 @@
 					<label for="pwd">Password</label>
 					<input type="password" id="pwd" name="password"/>
 				</div>
-				<input class='input' id='loginButton' type='button' value='Login'>
+				<input class='input' type='submit' value='Login'>
 			</div>
 		</div>
 		
@@ -35,7 +35,7 @@
 
 <script>
 
-$("#loginButton").click(function() {
+$("#form-login").submit(function() {
 	$.ajax("api/user/login", {
 		type: "POST",
 		contentType: "application/json",

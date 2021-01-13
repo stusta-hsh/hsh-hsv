@@ -19,6 +19,10 @@
 	src: url("../fonts/Garamond-Regular.otf") format("opentype");
 }
 
+/*	===============
+	Basic Styling
+	===============
+*/
 :root {
 	--accent: #00A651;
 	--accent-contrast: #008944; /*contrast to white: 4.5:1 as required by WCAG AA*/
@@ -48,7 +52,16 @@ p {
 	text-decoration: none;
 }
 
-.form > * {
+ol { list-style: outside decimal }
+ol > ol { list-style: outside lower-latin; }
+ol > ol > ol { list-style: outside upper-latin; }
+ol > ol > ol > ol { list-style: outside upper-roman; }
+
+/*	===============
+	Forms
+	===============
+*/
+form > * {
 	margin: 14px;
 }
 
@@ -61,26 +74,24 @@ label {
 	font-size: 14px;
 }
 
+/* Help for an input is provided by a details section in the label */
 label > details {
 	display: inline;
 }
-
-label > details > summary::marker {
-	content: "";
-}
-
 label > details > * {
 	padding: 0px;
 	margin: 0px;
 	text-align: left;
 }
+/* Hide details "arrow" */
+label > details > summary::marker { content: ""; }
+label > details > summary::-webkit-details-marker { display: none; }
 
 input {
 	-webkit-appearance: none;
 	-moz-appearance: none;
 	appearance: none;
 }
-
 input[type=text], input[type=email], input[type=password], input[type=number], input[type=room], input[type=date] {
 	display: block;
 	width: 100%;
@@ -88,12 +99,7 @@ input[type=text], input[type=email], input[type=password], input[type=number], i
 	border-radius: 0px; /*Safari for iOS*/
 	border-bottom: 2px solid var(--accent);
 }
-
-input:invalid {
-	border-bottom: 2px solid red;
-}
-
-input[type=button], input[type=submit] {
+input[type=submit] {
 	padding: 8px 14px;
 	background-color: var(--accent-contrast);
 	border: none;
@@ -102,10 +108,14 @@ input[type=button], input[type=submit] {
 	color: white;
 }
 
-ol { list-style: outside decimal }
-ol > ol { list-style: outside lower-latin; }
-ol > ol > ol { list-style: outside upper-latin; }
-ol > ol > ol > ol { list-style: outside upper-roman; }
+input:invalid {
+	border-bottom: 2px solid red;
+}
+
+/*	===============
+	Layouts
+	===============
+*/
 
 .card {
 	max-width: 600px;
@@ -114,7 +124,6 @@ ol > ol > ol > ol { list-style: outside upper-roman; }
 	box-shadow: 1px 2px 3px 1px #ccc;
 	margin: auto;
 }
-
 .card .title {
 	font-family: Futura;
 	font-weight: 400;
@@ -126,23 +135,15 @@ ol > ol > ol > ol { list-style: outside upper-roman; }
 	display: flex;
 	flex-direction: column;
 }
-
 .split > * {
 	flex-grow: 1;
 	padding: 12px 16px;
 	text-align: left;
 }
+.split > .img { margin: auto; text-align: center; }
+.split > .img > * { min-height: 120px; }
 
-.split > .img {
-	margin: auto;
-}
-.split > .img > * {
-	min-height: 120px;
-}
-
-.stack > .img > * {
-	min-width: 20%;
-}
+.stack > .img > * { min-width: 20%; }
 
 @media screen and (min-width: 415px) {
 	.split { flex-direction: row; }
