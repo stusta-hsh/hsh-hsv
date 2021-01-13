@@ -40,6 +40,9 @@ $("#form-login").submit(function() {
 		type: "POST",
 		contentType: "application/json",
 		data: JSON.stringify({email: $("#email").val(), password: $("#pwd").val()}),
+		error: function(xhr, status, text) {
+			alert(text + ": " + xhr.responseText);
+		},
 		success: function() {
 			window.location.href = "index";
 		}

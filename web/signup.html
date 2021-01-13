@@ -89,6 +89,9 @@ $("#form-signup").submit(function() {
 				movedIn: $("#movedin").val()
 			} : undefined)
 		}),
+		error: function(xhr, status, text) {
+			alert(text + ": " + xhr.responseText);
+		},
 		success: function() {
 			window.location.href = "index";
 		}
