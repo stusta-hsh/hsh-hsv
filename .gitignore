@@ -2,7 +2,10 @@ api/db_config.php
 #contains database credentials
 
 res/fonts/*
-#font files
+#font files (Futura -Medium, -Light, -Light-Obkique and Garamond -Regular)
 
 res/lib/*
 #libraries (jQuery)
+
+res/icons/*
+#icons (bootstrap)

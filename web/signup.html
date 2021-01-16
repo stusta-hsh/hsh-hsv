@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<link href="res/css/screen.css" rel="stylesheet" type="text/css" media="all">
+	<link href="res/css/icons.css" rel="stylesheet" type="text/css" media="all">
+	<script src="res/lib/jquery-3.5.1.js"></script>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+	<title>HSH Signup</title>
+</head>
+
+<body>
+	<div class='card'>
+		<p class='title'>Sign up</p>
+		
+		<div class='stack'>
+			<div class='img'>
+				<img src='res/icon.svg' alt='HSH Logo'>
+			</div>
+
+			<form id='form-signup' action="javascript:void(0);">
+				<div class='split'>
+					<div>
+						<label for="name">Short Name*</label>
+						<input type="text" id="name" required/>
+					</div>
+					<div>
+						<label for="firstName">First Name</label>
+						<input type="text" id="firstName"/>
+					</div>
+					<div>
+						<label for="lastName">Last Name</label>
+						<input type="text" id="lastName"/>
+					</div>
+				</div>
+				<div class='split'>
+					<div>
+						<label for="room">
+							<details>
+								<summary>Room <i class='bi-question-circle'></i></summary>
+								<p>Room number in the form <span class='reference'>House/Floor-Room</span>. The last dash is optional.</p>
+								<p>If no house number is given, 9 (HSH) is assumed.</p>
+								<p>In house 14, the WG number replaces the floor number.</p>
+							</details>
+						</label>
+						<input type="room" id="room" pattern='^([0-9]{1,2}\/)?([0-9]{1,2}|[0-9]{1,2}?-?[0-9]{1,2})$'/>
+					</div>
+					<div>
+						<label for="movedin">Moved in</label>
+						<input type="date" id="movedin"/>
+					</div>
+				</div>
+				<div class='split'>
+					<div>
+						<label for="email">Email*</label>
+						<input type="email" id="email" required/>
+					</div>
+					<div>
+						<label for="pwd">Password*</label>
+						<input type="password" id="pwd" required/>
+					</div>
+				</div>
+				<input class='input' type='submit' value='Sign up'>
+			</form>
+		</div>
+		
+		<p>The fields marked with a * are required.</p>
+	</div>
+
+<script>
+
+$("#form-signup").submit(function() {
+	var roomval = $("#room").val();
+	var roommatch = roomval.match(/^(?:([0-9]{1,2})\/)?(?:([0-9]{1,2})|([0-9]{1,2}?)-?([0-9]{1,2}))$/);
+	
+	$.ajax("api/user/request", {
+		type: "POST",
+		contentType: "application/json",
+		data: JSON.stringify({
+			name: $("#name").val(),
+			email: $("#email").val(),
+			password: $("#pwd").val(),
+			firstName: ($("#firstName").val() ? $("#firstName").val() : undefined),
+			lastName: ($("#lastName").val() ? $("#lastName").val() : undefined),
+			room: (roomval ? {
+				house: parseInt(roommatch[1] ? roommatch[1] : 9, 10),
+				floor: parseInt(roommatch[2] ? 0 : roommatch[3], 10),
+				room:  parseInt(roommatch[2] ? roommatch[2] : roommatch[4], 10),
+				movedIn: $("#movedin").val()
+			} : undefined)
+		}),
+		error: function(xhr, status, text) {
+			alert(text + ": " + xhr.responseText);
+		},
+		success: function() {
+			window.location.href = "index";
+		}
+	});
+});
+
+$("#room").keydown(function() {
+	console.log($("#movedin").required);
+	$("#movedin").prop("required", $("#room").val() ? true : false);
+});
+
+</script>
+</body>
+</html>
