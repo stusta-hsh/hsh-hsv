@@ -131,6 +131,18 @@ function verify() {
 }
 
 function register() {
+	if ($_SERVER['REQUEST_METHOD'] == 'POST') { return register_post(); }
+	else { return register_get(); }
+}
+
+function register_get() {
+	if (!authorize(2, 3, 4, 18)) { http_error(403, "You are not authorized to register users"); }
+
+	return q_fetch("SELECT id, date, name, first_name as firstName, last_name as lastName, email, house, floor, room, moved_in as movedIn
+		FROM user_requests WHERE verified = 1");
+}
+
+function register_post() {
 	if (!authorize(2, 3, 4, 18)) { http_error(403, "You are not authorized to register users"); }
 
 	$post = param_post();
