@@ -10,12 +10,34 @@
 
 <body>
 	<div class='card'>
-		<p class='title'>Register Users</p>
+		<p class='title'>Pending User Requests</p>
 		
-		
+		<table id='table'>
+			<tr>
+				<th>Date</th>
+				<th>Name</th>
+				<th>Room</th>
+			</tr>
+		</table>
 	</div>
 
 <script>
+
+$.ajax("../api/user/register", {
+		type: "GET",
+		error: function(xhr, status, text) {
+			alert(text + ": " + xhr.responseText);
+		},
+		success: function(result, status, xhr) {
+			$.each(result, function(i, item) {
+				$('<tr>').append(
+					$('<td>').text(item.date),
+					$('<td>').text(item.name),
+					$('<td>').text(item.room)
+				).appendTo('#table');
+			});
+		}
+	});
 
 </script>
 </body>
