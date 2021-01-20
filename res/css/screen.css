@@ -148,3 +148,22 @@ input:invalid {
 @media screen and (min-width: 415px) {
 	.split { flex-direction: row; }
 }
+
+/*	===============
+	Tables
+	===============
+*/
+table {
+	width: 100%;
+}
+
+th {
+	font-weight: 200;
+	font-style: italic;
+	text-align: left;
+}
+
+td {
+	font-family: Garamond;
+	text-align: left;
+}
