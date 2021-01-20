@@ -116,6 +116,9 @@ input:invalid {
 	Layouts
 	===============
 */
+.auth-invisible {		/* invisible, until authenticated/authorized */
+	display: none;
+}
 
 .card {
 	max-width: 600px;

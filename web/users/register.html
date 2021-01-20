@@ -9,7 +9,7 @@
 </head>
 
 <body>
-	<div class='card'>
+	<div class='card auth-invisible' id='c_pendingRequests'>
 		<p class='title'>Pending User Requests</p>
 		
 		<table>
@@ -18,27 +18,41 @@
 				<th>Name</th>
 				<th>Room</th>
 			</thead>
-			<tbody id='table'/>
+			<tbody id='t_pendingRequests'/>
 		</table>
 	</div>
-
+	<div class='card'>
+		<p class='title'>User Roles</p>
+		
+		<table>
+			<thead>
+				<th>Role</th>
+				<th>Name</th>
+				<th>Date</th>
+			</thead>
+			<tbody id='t_roles'/>
+		</table>
+	</div>
 <script>
 
 $.ajax("../api/user/register", {
-		type: "GET",
-		error: function(xhr, status, text) {
-			alert(text + ": " + xhr.responseText);
-		},
-		success: function(result, status, xhr) {
-			$.each(result, function(i, item) {
-				$('<tr>').append(
-					$('<td>').text(item.date),
-					$('<td>').text(item.name),
-					$('<td>').text(item.room)
-				).appendTo('#table');
-			});
+	type: "GET",
+	error: function(xhr, status, text) {
+		if (xhr.status != 401 && xhr.status != 403) {
+			alert(xhr.status + text + ": " + xhr.responseText);
 		}
-	});
+	},
+	success: function(result, status, xhr) {
+		$.each(result, function(i, item) {
+			$('<tr>').append(
+				$('<td>').text(item.date),
+				$('<td>').text(item.name),
+				$('<td>').text(item.room)
+			).appendTo('#t_pendingRequests');
+		});
+		$("#c_pendingRequests").removeClass("auth-invisible");
+	}
+});
 
 </script>
 </body>
