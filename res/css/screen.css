@@ -158,6 +158,7 @@ input:invalid {
 */
 table {
 	width: 100%;
+	border-collapse: collapse;
 }
 
 th {
@@ -169,4 +170,15 @@ th {
 td {
 	font-family: Garamond;
 	text-align: left;
+}
+
+thead {
+	border-bottom: 2px solid var(--accent);
+}
+thead * {
+	padding-bottom: 5px;
+}
+
+tbody> tr:first-child * {
+	padding-top: 5px;
 }
