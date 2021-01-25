@@ -26,6 +26,7 @@
 :root {
 	--accent: #00A651;
 	--accent-contrast: #008944; /*contrast to white: 4.5:1 as required by WCAG AA*/
+	--accent-light: #D5F0E3;
 }
 
 html {
@@ -165,11 +166,13 @@ th {
 	font-weight: 200;
 	font-style: italic;
 	text-align: left;
+	padding: 5px;
 }
 
 td {
 	font-family: Garamond;
 	text-align: left;
+	padding: 5px;
 }
 
 thead {
@@ -181,4 +184,7 @@ thead * {
 
 tbody> tr:first-child * {
 	padding-top: 5px;
+}
+tbody > tr:nth-child(2) {
+	background: var(--accent-light);
 }

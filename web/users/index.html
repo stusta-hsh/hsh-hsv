@@ -2,10 +2,10 @@
 <html>
 
 <head>
-	<link href="../res/css/screen.css" rel="stylesheet" type="text/css" media="all">
-	<script src="../res/lib/jquery-3.5.1.js"></script>
+	<link href="res/css/screen.css" rel="stylesheet" type="text/css" media="all">
+	<script src="res/lib/jquery-3.5.1.js"></script>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-	<title>Register Users</title>
+	<title>User Management</title>
 </head>
 
 <body>
@@ -35,7 +35,7 @@
 	</div>
 <script>
 
-$.ajax("../api/user/register", {
+$.ajax("api/user/register", {
 	type: "GET",
 	error: function(xhr, status, text) {
 		if (xhr.status != 401 && xhr.status != 403) {
@@ -44,14 +44,20 @@ $.ajax("../api/user/register", {
 	},
 	success: function(result, status, xhr) {
 		$.each(result, function(i, item) {
-			$('<tr>').append(
-				$('<td>').text(item.date),
-				$('<td>').text(item.name),
-				$('<td>').text(item.room)
+			$('<tr>')
+				.attr("ehref", "register?id=" + item.id)
+				.append(
+					$('<td>').text(item.date),
+					$('<td>').text(item.name),
+					$('<td>').text(item.room)
 			).appendTo('#t_pendingRequests');
 		});
 		$("#c_pendingRequests").removeClass("auth-invisible");
 	}
+});
+
+$('*[ehref]').click(function() {
+	window.location = $(this).data("ehref");
 });
 
 </script>
