@@ -1,7 +1,10 @@
 RewriteEngine on
 
+RewriteCond %{REQUEST_URI} ^(.*)/$
+RewriteRule (.*)/$ %1 [R,END]
+
 # /login -> /web/login.html
-RewriteRule ^(.*)$ web/$1.html [DPI]
+RewriteRule ^(.*)/?$ web/$1.html [DPI]
 
 # /users -> /users/index.html
 RewriteCond %{REQUEST_FILENAME} !-f
