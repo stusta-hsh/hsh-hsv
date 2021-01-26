@@ -53,6 +53,10 @@ p {
 	text-decoration: none;
 }
 
+/* Handling element hrefs */
+*[ehref] { cursor: pointer; }
+*[ehref]:hover { filter:brightness(85%); }
+
 ol { list-style: outside decimal }
 ol > ol { list-style: outside lower-latin; }
 ol > ol > ol { list-style: outside upper-latin; }
@@ -185,6 +189,5 @@ thead * {
 tbody> tr:first-child * {
 	padding-top: 5px;
 }
-tbody > tr:nth-child(2) {
-	background: var(--accent-light);
-}
+tbody > tr:nth-child(odd) { background: #fff; }
+tbody > tr:nth-child(even) { background: var(--accent-light); }

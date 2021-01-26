@@ -45,19 +45,16 @@ $.ajax("api/user/register", {
 	success: function(result, status, xhr) {
 		$.each(result, function(i, item) {
 			$('<tr>')
-				.attr("ehref", "register?id=" + item.id)
+				.attr("ehref", "users/register?id=" + item.id)
 				.append(
 					$('<td>').text(item.date),
 					$('<td>').text(item.name),
-					$('<td>').text(item.room)
-			).appendTo('#t_pendingRequests');
+					$('<td>').text(item.room))
+				.click(function() { window.location = $(this).attr("ehref"); })
+			.appendTo('#t_pendingRequests');
 		});
 		$("#c_pendingRequests").removeClass("auth-invisible");
 	}
-});
-
-$('*[ehref]').click(function() {
-	window.location = $(this).data("ehref");
 });
 
 </script>
