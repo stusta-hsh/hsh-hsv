@@ -10,6 +10,39 @@
 
 <body>
 
+<div class='card'>
+	<p class='title'>Registration request</p>
+
+	<table>
+		<tr> <th>Name</th> <td id='t_name'/> </tr>
+		<tr> <th>First Name</th> <td id='t_firstName'/> </tr>
+		<tr> <th>Last Name</th> <td id='t_lastName'/> </tr>
+		<tr> <th>Room</th> <td id='t_room'/> </tr>
+		<tr> <th>Moved in</th> <td id='t_movedIn'/> </tr>
+		<tr> <th>E-Mail</th> <td id='t_email'/> </tr>
+	</table>
+</div>
+
+<div class='card'>
+	<p class='title'>Merge with existing user</p>
+
+	<form id='form-merge' action="javascript:void(0);">
+		<input type='search'>
+
+		<h2>Suggestions</h2>
+		<table>
+		</table>
+
+		<input type='submit' value='Merge'>
+		<p>Please make sure, that there is no account associated to the user. This can't be changed later.</p>
+	</form>
+</div>
+
+<form id='form-register' action="javascript:void(0);">
+		<input class='input' type='submit' value='Register'>
+		<input class='input' type='submit' value='Decline'>
+	</form>
+
 <script>
 
 var params = new URLSearchParams(window.location.search);
@@ -23,7 +56,12 @@ $.ajax("../api/user/register", {
 		}
 	},
 	success: function(result, status, xhr) {
-		console.log(result);
+		$("#t_name").html(result.name);
+		$("#t_firstName").html(result.firstName);
+		$("#t_lastName").html(result.lastName);
+		$("#t_room").html(result.room);
+		$("#t_movedIn").html(result.movedIn);
+		$("#t_email").html(result.email);
 	}
 });
 

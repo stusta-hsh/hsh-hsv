@@ -140,7 +140,8 @@ function register_get() {
 
 	if (array_key_exists('id', $_GET)) {
 		return qp_firstRow("SELECT id, date, name, first_name as firstName, last_name as lastName, email, house, floor, room, moved_in as movedIn
-			FROM user_requests WHERE verified = 1 AND id = ?", i, $_GET['id']);
+			FROM user_requests WHERE verified = 1 AND id = ?", i, $_GET['id'])
+			?? http_error(409, "Request $_GET[id] doesn't exist. Probably it still needs to be verified or it already has been registered.");
 	} else {
 		return q_fetch("SELECT id, date, name, first_name as firstName, last_name as lastName, email, house, floor, room, moved_in as movedIn
 			FROM user_requests WHERE verified = 1");
