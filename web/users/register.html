@@ -10,8 +10,22 @@
 
 <body>
 
-
 <script>
+
+var params = new URLSearchParams(window.location.search);
+
+$.ajax("../api/user/register", {
+	type: "GET",
+	data: {id: params.get('id')},
+	error: function(xhr, status, text) {
+		if (xhr.status != 401 && xhr.status != 403) {
+			alert(xhr.status + text + ": " + xhr.responseText);
+		}
+	},
+	success: function(result, status, xhr) {
+		console.log(result);
+	}
+});
 
 </script>
 </body>

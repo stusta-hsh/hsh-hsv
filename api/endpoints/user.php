@@ -138,8 +138,13 @@ function register() {
 function register_get() {
 	if (!authorize(2, 3, 4, 18)) { http_error(403, "You are not authorized to register users"); }
 
-	return q_fetch("SELECT id, date, name, first_name as firstName, last_name as lastName, email, house, floor, room, moved_in as movedIn
-		FROM user_requests WHERE verified = 1");
+	if (array_key_exists('id', $_GET)) {
+		return qp_firstRow("SELECT id, date, name, first_name as firstName, last_name as lastName, email, house, floor, room, moved_in as movedIn
+			FROM user_requests WHERE verified = 1 AND id = ?", i, $_GET['id']);
+	} else {
+		return q_fetch("SELECT id, date, name, first_name as firstName, last_name as lastName, email, house, floor, room, moved_in as movedIn
+			FROM user_requests WHERE verified = 1");
+	}
 }
 
 function register_post() {
