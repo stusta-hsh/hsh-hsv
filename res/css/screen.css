@@ -37,6 +37,17 @@ html {
 	padding: 5px 0px 20px 0px;
 }
 
+h1 {
+	font-size: 20px;
+	font-weight: 400;
+	text-align: left;
+}
+h2 {
+	font-size: 16px;
+	font-weight: 400;
+	text-align: left;
+}
+
 p {
 	font-family: Garamond;
 	font-style: normal;
@@ -133,11 +144,9 @@ input:invalid {
 	box-shadow: 1px 2px 3px 1px #ccc;
 	margin: auto;
 }
-.card .title {
-	font-family: Futura;
-	font-weight: 400;
-	font-size: 20px;
+.card h1 {
 	padding: 20px;
+	text-align: center;
 }
 
 .split {
