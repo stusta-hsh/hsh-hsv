@@ -25,17 +25,20 @@
 
 <div class='card'>
 	<h1>Merge with existing user</h1>
+	<div class='input'>
+		<input type="search" id="s_merge"/>
+	</div>
 
-	<form id='form-merge' action="javascript:void(0);">
-		<input type='search'>
+	<h2>Suggestions</h2>
+	<table>
+		<thead>
+			<th> Name </th>
+		</thead>
+		<tbody id='t_suggestions'/>
+	</table>
 
-		<h2>Suggestions</h2>
-		<table>
-		</table>
-
-		<input type='submit' value='Merge'>
-		<p>Please make sure, that there is no account associated to the user. This can't be changed later.</p>
-	</form>
+	<input type='submit' value='Merge'>
+	<p>Please make sure, that there is no account associated to the user. This can't be changed later.</p>
 </div>
 
 <form id='form-register' action="javascript:void(0);">
@@ -51,9 +54,7 @@ $.ajax("../api/user/register", {
 	type: "GET",
 	data: {id: params.get('id')},
 	error: function(xhr, status, text) {
-		if (xhr.status != 401 && xhr.status != 403) {
-			alert(xhr.status + text + ": " + xhr.responseText);
-		}
+		alert(xhr.status + text + ": " + xhr.responseText);
 	},
 	success: function(result, status, xhr) {
 		$("#t_name").html(result.name);
@@ -62,6 +63,15 @@ $.ajax("../api/user/register", {
 		$("#t_room").html(result.room);
 		$("#t_movedIn").html(result.movedIn);
 		$("#t_email").html(result.email);
+
+		$.each(result.suggestions, function(i, item) {
+			$('<tr>')
+				.append(
+					$('<td>').text(item.name),
+					$('<td>').text(item.firstName),
+					$('<td>').text(item.lastName))
+			.appendTo('#t_suggestions');
+		});
 	}
 });
 

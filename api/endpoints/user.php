@@ -139,9 +139,24 @@ function register_get() {
 	if (!authorize(2, 3, 4, 18)) { http_error(403, "You are not authorized to register users"); }
 
 	if (array_key_exists('id', $_GET)) {
-		return qp_firstRow("SELECT id, date, name, first_name as firstName, last_name as lastName, email, house, floor, room, moved_in as movedIn
-			FROM user_requests WHERE verified = 1 AND id = ?", i, $_GET['id'])
-			?? http_error(409, "Request $_GET[id] doesn't exist. Probably it still needs to be verified or it already has been registered.");
+		$output = qp_firstRow("SELECT id, date, name, first_name as firstName, last_name as lastName, email, house, floor, room, moved_in as movedIn
+			FROM user_requests WHERE verified = 1 AND id = ?", i, $_GET['id']);
+
+		if (!$output) { http_error(409, "Request $_GET[id] doesn't exist. Probably it still needs to be verified or it already has been registered."); }
+
+		$suggestions = array();
+		if ($output['room']) { 
+			$suggestions = array_merge($suggestions, q_fetch("SELECT u.id, u.name, u.first_name, u.last_name, r.house, r.floor, r.room, 100 AS rang
+				FROM users u LEFT JOIN rooms r ON (r.user = u.id)
+				WHERE u.password = '' AND r.house = $output[house] AND r.floor = $output[floor] AND r.room = $output[room]"));
+		}
+		$suggestions = array_merge($suggestions, q_fetch("SELECT u.id, u.name, u.first_name, u.last_name, r.house, r.floor, r.room, 50 AS rang
+			FROM users u LEFT JOIN rooms r ON (r.user = u.id) WHERE u.password = '' AND u.last_name = '$output[lastName]'"));
+		$suggestions = array_merge($suggestions, q_fetch("SELECT u.id, u.name, u.first_name, u.last_name, r.house, r.floor, r.room, 10 AS rang
+			FROM users u LEFT JOIN rooms r ON (r.user = u.id) WHERE u.password = '' AND u.name = '$output[name]'"));
+		$output['suggestions'] = $suggestions;
+		
+		return $output;
 	} else {
 		return q_fetch("SELECT id, date, name, first_name as firstName, last_name as lastName, email, house, floor, room, moved_in as movedIn
 			FROM user_requests WHERE verified = 1");
