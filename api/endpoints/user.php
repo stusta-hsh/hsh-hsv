@@ -38,7 +38,8 @@ function login() {
 	if(password_verify($password, $hash)) {
 		// ** User authenticated **
 		session_name('hshsession');
-		session_set_cookie_params(0, '/', '.stusta.de', true, true);
+		if ($DEBUG) { session_set_cookie_params(0, '/', '127.0.0.1', true, true); }
+		else { session_set_cookie_params(0, '/', '.stusta.de', true, true); }
 		session_start();
 		
 		$date = date('Y-m-d');
