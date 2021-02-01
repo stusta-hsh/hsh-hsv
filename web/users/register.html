@@ -24,26 +24,30 @@
 </div>
 
 <div class='card'>
-	<h1>Merge with existing user</h1>
-	<div class='input'>
-		<input type="search" id="s_merge"/>
-	</div>
-
-	<h2>Suggestions</h2>
-	<table>
-		<thead>
-			<th> Name </th>
-		</thead>
-		<tbody id='t_suggestions'/>
-	</table>
-
-	<input type='submit' value='Merge'>
-	<p>Please make sure, that there is no account associated to the user. This can't be changed later.</p>
+	<form>
+		<h1>Merge with existing user</h1>
+		<h2>Suggestions</h2>
+		<table>
+			<thead>
+				<th> Name </th>
+			</thead>
+			<tbody id='t_suggestions'/>
+		</table>
+		<div class='split'>
+			<h2>Custom Search</h2>
+			<div class='input'>
+				<input type="search" id="s_merge" placeholder="Search"/>
+			</div>
+		</div>
+		
+		
+	</form>
 </div>
 
 <form id='form-register' action="javascript:void(0);">
 		<input class='input' type='submit' value='Register'>
 		<input class='input' type='submit' value='Decline'>
+		<p>Please make sure, that there is no account associated to the user. This can't be changed later.</p>
 	</form>
 
 <script>
@@ -60,7 +64,7 @@ $.ajax("../api/user/register", {
 		$("#t_name").html(result.name);
 		$("#t_firstName").html(result.firstName);
 		$("#t_lastName").html(result.lastName);
-		$("#t_room").html(result.room);
+		$("#t_room").html((result.house != 9 ? result.house + '/' : '') + result.floor + result.room);
 		$("#t_movedIn").html(result.movedIn);
 		$("#t_email").html(result.email);
 
