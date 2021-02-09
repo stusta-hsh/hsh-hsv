@@ -162,6 +162,7 @@ input:invalid {
 }
 .split > .img { margin: auto; text-align: center; }
 .split > .img > * { min-height: 120px; }
+.split > h2 ~ * { margin-top: 30px; }
 
 .stack > .img > * { min-width: 20%; }
 
@@ -203,3 +204,12 @@ tbody> tr:first-child * {
 }
 tbody > tr:nth-child(odd) { background: #fff; }
 tbody > tr:nth-child(even) { background: var(--accent-light); }
+
+select {
+	width: 100%;
+	border: none;
+}
+
+option {
+	padding: 5px 10px;
+}

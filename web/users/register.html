@@ -26,33 +26,28 @@
 <div class='card'>
 	<form>
 		<h1>Merge with existing user</h1>
-		<h2>Suggestions</h2>
-		<table>
-			<thead>
-				<th> Name </th>
-			</thead>
-			<tbody id='t_suggestions'/>
-		</table>
 		<div class='split'>
-			<h2>Custom Search</h2>
+			<h2>Suggestions</h2>
 			<div class='input'>
-				<input type="search" id="s_merge" placeholder="Search"/>
+				<input type="search" id="i_search" placeholder="Custom Search"/>
 			</div>
 		</div>
-		
+		<select id='s_suggestions' size='3'></select>
+		<h2>Conflicts</h2>
 		
 	</form>
 </div>
 
 <form id='form-register' action="javascript:void(0);">
-		<input class='input' type='submit' value='Register'>
-		<input class='input' type='submit' value='Decline'>
-		<p>Please make sure, that there is no account associated to the user. This can't be changed later.</p>
-	</form>
+	<input class='input' type='submit' value='Register'>
+	<input class='input' type='submit' value='Decline'>
+	<p>Please make sure, that there is no account associated to the user. This can't be changed later.</p>
+</form>
 
 <script>
 
 var params = new URLSearchParams(window.location.search);
+var suggestions;
 
 $.ajax("../api/user/register", {
 	type: "GET",
@@ -64,21 +59,47 @@ $.ajax("../api/user/register", {
 		$("#t_name").html(result.name);
 		$("#t_firstName").html(result.firstName);
 		$("#t_lastName").html(result.lastName);
-		$("#t_room").html((result.house != 9 ? result.house + '/' : '') + result.floor + result.room);
+		$("#t_room").html(result.house ? (result.house != 9 ? result.house + '/' : '') + result.floor + result.room : "");
 		$("#t_movedIn").html(result.movedIn);
 		$("#t_email").html(result.email);
 
-		$.each(result.suggestions, function(i, item) {
-			$('<tr>')
-				.append(
-					$('<td>').text(item.name),
-					$('<td>').text(item.firstName),
-					$('<td>').text(item.lastName))
-			.appendTo('#t_suggestions');
-		});
+		suggestions = result.suggestions;
+		setSuggestions(suggestions);
 	}
 });
 
+$("#i_search").on('input', function() {
+	if ($("#i_search").val() == '') { setSuggestions(suggestions); return; }
+	$.ajax("../api/user/suggest", {
+		type: "GET",
+		data: { query: $("#i_search").val() },
+		error: function(xhr, status, text) {
+			alert(text + ": " + xhr.responseText);
+		},
+		success: function(result, status, xhr) {
+			setSuggestions(result);
+		}
+	});
+});
+
+function setSuggestions(s) {
+	$("#s_suggestions").empty();
+	$.each(s, function(i, item) {
+		$("#s_suggestions").append($("<option />")
+			.val(item.id)
+			.text(userNameRoom(item.name, item.house, item.floor, item.room)));
+	});
+}
+
+function userNameRoom(name, house, floor, room) {
+	output = name;
+	switch (house) {
+		case null: output += " (extern)"; break;
+		case '9': output += ` (${100*floor + 1*room})`; break;
+		default: output += ` (${house}/${100*floor + 1*room})`; break;
+	}
+	return output;
+}
 </script>
 </body>
 </html>
