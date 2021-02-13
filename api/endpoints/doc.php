@@ -38,7 +38,7 @@ function all() {
 function endpoint() {
 	// If called from the shortcut, the requested endpoint stands in the original URL
 	if ($_GET['u']) {
-		$file = docfile(explode('/', $_GET['u'])[1]);
+		$file = docfile(explode('/', $_GET['u'])[0]);
 	} else { // If called directly, the requested endpoint is a GET parameter
 		$file = docfile(require_param($_GET['endpoint']));
 	}
@@ -67,7 +67,7 @@ function fun() {
 	// If called from the the shortcut, the requested endpoint and function stand in the original URL
 	if ($_GET['u']) {
 		$u = explode('/', $_GET['u']);
-		$file = docfile($u[1]);
+		$file = docfile($u[0]);
 
 		// The shortcut URL is the same as the URL of the API function,
 		// so you have to find the section about it first
@@ -113,13 +113,13 @@ function fun() {
 function shortcut() {
 	$shortcut = explode('/', $_GET['u']);
 	switch (count($shortcut)) {
-		case 1:
+		case 0:
 			return all();
-		case 2: 
-			if (strlen($shortcut[1]) == 0) { return all(); }
+		case 1: 
+			if (strlen($shortcut[0]) == 0) { return all(); }
 			return endpoint();
 		default:
-			if (strlen($shortcut[2]) == 0) { return endpoint(); }
+			if (strlen($shortcut[1]) == 0) { return endpoint(); }
 			return fun();
 	}
 }
@@ -167,7 +167,7 @@ function multilineAttribute($file, &$i, $name) {
 
 function findFun($file) {
 	$i = 0;
-	while ($file[$i] && substr($file[$i], 0, 12+strlen($_GET['u'])) != "*\tURI: `/api" . $_GET['u']) { $i++; }
+	while ($file[$i] && substr($file[$i], 0, 13+strlen($_GET['u'])) != "*\tURI: `/api/" . $_GET['u']) { $i++; }
 	if (!$file[$i]) { http_error(400, "The documentation to the function $_GET[u] doesn't exist in this endpoint."); }
 	while (substr($file[$i], 0, 3) != '###') { $i--; }
 	return substr($file[$i], 4, -1);

@@ -5,6 +5,7 @@ require('../api.php');
 // Determine API function 
 switch ($_GET['q']) {
 	case 'me': output(me()); break;
+	case 'u': output(u()); break;
 	case 'login': output(login()); break;
 	case 'create': output(create()); break;
 	case 'request': output(request()); break;
@@ -24,6 +25,15 @@ function me() {
 	$myid = authenticate();
 	$me = q_firstRow("SELECT * FROM users WHERE id=$myid");
 	return $me;
+}
+
+function u() {
+	authenticate();
+	$date = $_GET['date'] ?? date('Y-m-d');
+	return qp_firstRow("SELECT u.id, u.name, u.first_name as firstName, u.last_name as lastName,
+			r.house, r.floor, r.room, r.date as movedIn, r.end as movedOut, u.email
+		FROM users u LEFT JOIN rooms r ON (r.user = u.id AND '$date' BETWEEN r.date AND (CASE WHEN r.end IS NULL THEN '$date' ELSE r.end END))
+		WHERE u.id = ?", 'i', $_GET['u']);
 }
 
 function login() {

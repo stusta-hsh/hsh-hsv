@@ -32,9 +32,10 @@
 				<input type="search" id="i_search" placeholder="Custom Search"/>
 			</div>
 		</div>
-		<select id='s_suggestions' size='3'></select>
+		<select id="i_suggestions" size='3'></select>
+
 		<h2>Conflicts</h2>
-		
+		<table><tbody id='t_merge'/></table>
 	</form>
 </div>
 
@@ -46,8 +47,11 @@
 
 <script>
 
+// Init
+// ====
+
 var params = new URLSearchParams(window.location.search);
-var suggestions;
+var request, mergeCandidate;
 
 $.ajax("../api/user/register", {
 	type: "GET",
@@ -63,13 +67,16 @@ $.ajax("../api/user/register", {
 		$("#t_movedIn").html(result.movedIn);
 		$("#t_email").html(result.email);
 
-		suggestions = result.suggestions;
-		setSuggestions(suggestions);
+		request = result;
+		setSuggestions(request.suggestions);
 	}
 });
 
+// Events
+// ======
+
 $("#i_search").on('input', function() {
-	if ($("#i_search").val() == '') { setSuggestions(suggestions); return; }
+	if ($("#i_search").val() == '') { setSuggestions(request.suggestions); return; }
 	$.ajax("../api/user/suggest", {
 		type: "GET",
 		data: { query: $("#i_search").val() },
@@ -82,10 +89,31 @@ $("#i_search").on('input', function() {
 	});
 });
 
+$("#i_suggestions").on('change', function() {
+	$.ajax("../api/user/u/" + $("#i_suggestions").val(), {
+		type: "GET",
+		error: function(xhr, status, text) {
+			alert(text + ": " + xhr.responseText);
+		},
+		success: function(result, status, xhr) {
+			$("#t_merge").empty();
+			$.each(result, function(i, property) {
+				$("#t_merge").append($("<tr/>").append(
+					$("<th/>").text(i),
+					$("<td/>").text(property))
+				);
+			})
+		}
+	});
+})
+
+// Helpers
+// =======
+
 function setSuggestions(s) {
-	$("#s_suggestions").empty();
+	$("#i_suggestions").empty();
 	$.each(s, function(i, item) {
-		$("#s_suggestions").append($("<option />")
+		$("#i_suggestions").append($("<option />")
 			.val(item.id)
 			.text(userNameRoom(item.name, item.house, item.floor, item.room)));
 	});
