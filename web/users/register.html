@@ -63,7 +63,7 @@ $.ajax("../api/user/register", {
 		$("#t_name").html(result.name);
 		$("#t_firstName").html(result.firstName);
 		$("#t_lastName").html(result.lastName);
-		$("#t_room").html(result.house ? (result.house != 9 ? result.house + '/' : '') + result.floor + result.room : "");
+		$("#t_room").html(`${result.house}/${100*result.floor + 1*result.room}`);
 		$("#t_movedIn").html(result.movedIn);
 		$("#t_email").html(result.email);
 
@@ -97,12 +97,12 @@ $("#i_suggestions").on('change', function() {
 		},
 		success: function(result, status, xhr) {
 			$("#t_merge").empty();
-			$.each(result, function(i, property) {
-				$("#t_merge").append($("<tr/>").append(
-					$("<th/>").text(i),
-					$("<td/>").text(property))
-				);
-			})
+			addKeepOption("Name", "name", request.name, result.name);
+			addKeepOption("First Name", "firstName", request.firstName, result.firstName);
+			addKeepOption("Last Name", "lastName", request.lastName, result.lastName);
+			addKeepOption("Room", "room", `${request.house}/${100*request.floor + 1*request.room}`, `${result.house}/${100*result.floor + 1*result.room}`);
+			addKeepOption("Moved In", "movedIn", request.movedIn, result.movedIn);
+			addKeepOption("E-Mail", "email", request.email, result.email);
 		}
 	});
 })
@@ -117,6 +117,20 @@ function setSuggestions(s) {
 			.val(item.id)
 			.text(userNameRoom(item.name, item.house, item.floor, item.room)));
 	});
+}
+
+function addKeepOption(title, name, req, merge) {
+	if (req != merge) {
+		$("#t_merge").append($("<tr/>").append(
+			$("<th/>").text(title),
+			$("<td/>").append(
+				$("<input type='radio' value='apply'/>").attr("name", name).attr("id", name + "-a"),
+				$("<label/>").attr("for", name + "-a").text(req)),
+			$("<td/>").append(
+				$("<input type='radio' value='keep'/>").attr("name", name).attr("id", name + "-k"),
+				$("<label/>").attr("for", name + "-k").text(merge)),
+		));
+	}
 }
 
 function userNameRoom(name, house, floor, room) {
