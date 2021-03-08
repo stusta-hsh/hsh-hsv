@@ -159,10 +159,6 @@ input:invalid {
 	Layouts
 	===============
 */
-.auth-invisible {		/* invisible, until authenticated/authorized */
-	display: none;
-}
-
 .card {
 	max-width: 600px;
 	background-color: white;
@@ -193,6 +189,9 @@ input:invalid {
 @media screen and (min-width: 415px) {
 	.split { flex-direction: row; }
 }
+
+/* display elements according to workflow */
+.flow-invisible { display: none; }
 
 /*	===============
 	Tables

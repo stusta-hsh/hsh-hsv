@@ -33,9 +33,11 @@
 			</div>
 		</div>
 		<select id="i_suggestions" size='3'></select>
-
-		<h2>Conflicts</h2>
-		<table><tbody id='t_merge'/></table>
+		
+		<div id='c_conflicts' class='flow-invisible'>
+			<h2>Conflicts</h2>
+			<table><tbody id='t_merge'/></table>
+		</div>
 	</form>
 </div>
 
@@ -90,6 +92,7 @@ $("#i_search").on('input', function() {
 });
 
 $("#i_suggestions").on('change', function() {
+	if ($("#i_suggestions").val() == -1) { $("#c_conflicts").addClass("flow-invisible"); return; }
 	$.ajax("../api/user/u/" + $("#i_suggestions").val(), {
 		type: "GET",
 		error: function(xhr, status, text) {
@@ -105,6 +108,7 @@ $("#i_suggestions").on('change', function() {
 			addKeepOption("E-Mail", "email", request.email, result.email);
 		}
 	});
+	$("#c_conflicts").removeClass("flow-invisible");
 })
 
 // Helpers
@@ -117,6 +121,9 @@ function setSuggestions(s) {
 			.val(item.id)
 			.text(userNameRoom(item.name, item.house, item.floor, item.room)));
 	});
+	$("#i_suggestions").append($("<option />").val(-1).text("Don't merge"))
+		.prop("selectedIndex", 0)
+		.change();
 }
 
 function addKeepOption(title, name, req, merge) {
@@ -124,7 +131,7 @@ function addKeepOption(title, name, req, merge) {
 		$("#t_merge").append($("<tr/>").append(
 			$("<th/>").text(title),
 			$("<td/>").append(
-				$("<input type='radio' value='apply'/>").attr("name", name).attr("id", name + "-a"),
+				$("<input type='radio' value='apply' checked/>").attr("name", name).attr("id", name + "-a"),
 				$("<label/>").attr("for", name + "-a").text(req)),
 			$("<td/>").append(
 				$("<input type='radio' value='keep'/>").attr("name", name).attr("id", name + "-k"),

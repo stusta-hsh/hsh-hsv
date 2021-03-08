@@ -9,7 +9,7 @@
 </head>
 
 <body>
-	<div class='card auth-invisible' id='c_pendingRequests'>
+	<div class='card flow-invisible' id='c_pendingRequests'>
 		<h1>Pending User Requests</h1>
 		
 		<table>
@@ -53,7 +53,7 @@ $.ajax("api/user/register", {
 				.click(function() { window.location = $(this).attr("ehref"); })
 			.appendTo('#t_pendingRequests');
 		});
-		$("#c_pendingRequests").removeClass("auth-invisible");
+		$("#c_pendingRequests").removeClass("flow-invisible");
 	}
 });
 
