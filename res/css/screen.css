@@ -34,7 +34,7 @@ html {
 	background-color: #EEE;
 	font-family: Futura;
 	text-align: center;
-	padding: 5px 0px 20px 0px;
+	padding: 0px 0px 20px 0px;
 }
 
 h1 {
@@ -124,7 +124,7 @@ input[type=room], input[type=date], input[type=search] {
 	border-radius: 0px; /*Safari for iOS*/
 	border-bottom: 2px solid var(--accent);
 }
-input[type=submit] {
+input[type=submit], input[type=button] {
 	padding: 8px 14px;
 	background-color: var(--accent-contrast);
 	border: none;

@@ -44,7 +44,7 @@
 
 <form id='form-register' action="javascript:void(0);">
 	<input class='input' type='submit' value='Register'>
-	<input class='input' type='submit' value='Decline'>
+	<input class='input' type='button' value='Decline'>
 </form>
 
 <script>
@@ -113,7 +113,32 @@ $("#i_suggestions").on('change', function() {
 	});
 	$("#c_conflicts").removeClass("flow-invisible");
 	$("#p_noconflict").addClass("flow-invisible");
-})
+});
+
+$("#form-register").submit(function() {
+	$.ajax("api/user/register", {
+		type: "POST",
+		contentType: "application/json",
+		data: JSON.stringify({
+			request: request.id,
+			ghost: ($("#i_suggestions").val() != -1 ? {
+				id: $("#i_suggestions").val(),
+				keep: [
+					($("#name-k").prop("checked") ? "name" : undefined),
+					($("#firstName-k").prop("checked") ? "firstName" : undefined),
+					($("#lastName-k").prop("checked") ? "lastName" : undefined),
+					($("#room-k").prop("checked") ? "room" : undefined)
+				]
+			} : undefined)
+		}),
+		error: function(xhr, status, text) {
+			alert(text + ": " + xhr.responseText);
+		},
+		success: function() {
+			window.location.href = "index";
+		}
+	});
+});
 
 // Helpers
 // =======
