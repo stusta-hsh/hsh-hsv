@@ -44,7 +44,7 @@
 
 <form id='form-register' action="javascript:void(0);">
 	<input class='input' type='submit' value='Register'>
-	<input class='input' type='button' value='Decline'>
+	<input class='input' type='button' id='b_decline' value='Decline'>
 </form>
 
 <script>
@@ -135,9 +135,25 @@ $("#form-register").submit(function() {
 			alert(text + ": " + xhr.responseText);
 		},
 		success: function() {
-			window.location.href = "index";
+			window.location.href = "../users";
 		}
 	});
+});
+
+$("#b_decline").click(function() {
+	if (confirm("Do you really want to decline this request permanently?")) {
+		$.ajax("api/user/register", {
+			type: "DELETE",
+			contentType: "application/json",
+			data: JSON.stringify({ request: request.id }),
+			error: function(xhr, status, text) {
+				alert(text + ": " + xhr.responseText);
+			},
+			success: function() {
+				window.location.href = "../users";
+			}
+		});
+	}
 });
 
 // Helpers
