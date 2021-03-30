@@ -1,4 +1,16 @@
 RewriteEngine on
 
-# /login -> /web/login.html
-RewriteRule ^(.*)$ web/$1.html [END]
+# /page/ -> /page
+RewriteCond %{REQUEST_URI} ^(.*)/$
+RewriteRule (.*)/$ %1 [R,END]
+
+# /page -> /web/page.html
+RewriteRule ^(.*)/?$ web/$1.html [DPI]
+
+# if page.html doesn't exist:
+# /page -> /page/index.html
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^(web/.*)\.html$ $1/index.html
+
+# don't do anything, but END redirection
+RewriteRule ^(.*)$ $1 [END]

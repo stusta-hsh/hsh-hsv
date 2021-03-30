@@ -5,6 +5,7 @@ require('../api.php');
 // Determine API function 
 switch ($_GET['q']) {
 	case 'me': output(me()); break;
+	case 'u': output(u()); break;
 	case 'login': output(login()); break;
 	case 'create': output(create()); break;
 	case 'request': output(request()); break;
@@ -26,6 +27,15 @@ function me() {
 	return $me;
 }
 
+function u() {
+	authenticate();
+	$date = $_GET['date'] ?? date('Y-m-d');
+	return qp_firstRow("SELECT u.id, u.name, u.first_name as firstName, u.last_name as lastName,
+			r.house, r.floor, r.room, r.date as movedIn, r.end as movedOut, u.email
+		FROM users u LEFT JOIN rooms r ON (r.user = u.id AND '$date' BETWEEN r.date AND (CASE WHEN r.end IS NULL THEN '$date' ELSE r.end END))
+		WHERE u.id = ?", 'i', $_GET['u']);
+}
+
 function login() {
 	$post = param_post();
 	$email = require_param($post['email']);				// The request must contain the users email address
@@ -38,7 +48,8 @@ function login() {
 	if(password_verify($password, $hash)) {
 		// ** User authenticated **
 		session_name('hshsession');
-		session_set_cookie_params(0, '/', '.stusta.de', true, true);
+		if ($DEBUG) { session_set_cookie_params(0, '/', '127.0.0.1', true, true); }
+		else { session_set_cookie_params(0, '/', '.stusta.de', true, true); }
 		session_start();
 		
 		$date = date('Y-m-d');
@@ -131,6 +142,39 @@ function verify() {
 }
 
 function register() {
+	if ($_SERVER['REQUEST_METHOD'] == 'POST') { return register_post(); }
+	else { return register_get(); }
+}
+
+function register_get() {
+	if (!authorize(2, 3, 4, 18)) { http_error(403, "You are not authorized to register users"); }
+
+	if (array_key_exists('id', $_GET)) {
+		$output = qp_firstRow("SELECT id, date, name, first_name as firstName, last_name as lastName, email, house, floor, room, moved_in as movedIn
+			FROM user_requests WHERE verified = 1 AND id = ?", i, $_GET['id']);
+
+		if (!$output) { http_error(409, "Request $_GET[id] doesn't exist. Probably it still needs to be verified or it already has been registered."); }
+
+		$suggestions = array();
+		if ($output['room']) { 
+			$suggestions = array_merge($suggestions, q_fetch("SELECT u.id, u.name, u.first_name, u.last_name, r.house, r.floor, r.room, 100 AS rang
+				FROM users u LEFT JOIN rooms r ON (r.user = u.id)
+				WHERE u.password = '' AND r.house = $output[house] AND r.floor = $output[floor] AND r.room = $output[room]"));
+		}
+		$suggestions = array_merge($suggestions, q_fetch("SELECT u.id, u.name, u.first_name, u.last_name, r.house, r.floor, r.room, 50 AS rang
+			FROM users u LEFT JOIN rooms r ON (r.user = u.id) WHERE u.password = '' AND u.last_name = '$output[lastName]'"));
+		$suggestions = array_merge($suggestions, q_fetch("SELECT u.id, u.name, u.first_name, u.last_name, r.house, r.floor, r.room, 10 AS rang
+			FROM users u LEFT JOIN rooms r ON (r.user = u.id) WHERE u.password = '' AND u.name = '$output[name]'"));
+		$output['suggestions'] = $suggestions;
+		
+		return $output;
+	} else {
+		return q_fetch("SELECT id, date, name, first_name as firstName, last_name as lastName, email, house, floor, room, moved_in as movedIn
+			FROM user_requests WHERE verified = 1");
+	}
+}
+
+function register_post() {
 	if (!authorize(2, 3, 4, 18)) { http_error(403, "You are not authorized to register users"); }
 
 	$post = param_post();
